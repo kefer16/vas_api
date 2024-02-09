@@ -5,7 +5,7 @@ export class ErrorPersonalizado extends Error {
    }
 }
 
-export class ErrorDto {
+export class ErrorResDto {
    isValidate: boolean;
    code: string;
    message: string;

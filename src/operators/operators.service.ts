@@ -1,34 +1,39 @@
 import { Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/db/mssql.service";
-import { GetOpertorsDto } from "./dto/get-operators.dto";
+
 import * as sql from "mssql";
-import { GetOpertorDto } from "./dto/get-operator.dto";
+import { GetOperatorsResDto } from "./dto/responses/get-operators-res.dto";
+import { GetOperatorResDto } from "./dto/responses/get-operator-res.dto";
+import { CreateOperatorReqDto } from "./dto/requests/create-operator-req.dto";
+import { CreateOperatorResDto } from "./dto/responses/create-operator-res.dto";
+import { UpdateOperatorReqDto } from "./dto/requests/update-operator-req.dto";
+import { UpdateOperatorResDto } from "./dto/responses/update-operator-res.dto";
 
 @Injectable()
 export class OperatorsService {
    constructor(private mssql: MSSQLService) {}
 
-   async getOperators(): Promise<GetOpertorsDto[]> {
+   async getOperators(): Promise<GetOperatorsResDto[]> {
       const result = await this.mssql.executeProcedureList(
          "spGetOperators",
          [],
       );
 
-      const resultMapper: GetOpertorsDto[] = result.map(
+      const resultMapper: GetOperatorsResDto[] = result.map(
          (item) =>
             ({
                OperatorId: item.OperatorId ?? "",
                Name: item.Name ?? "",
-            }) as GetOpertorsDto,
+            }) as GetOperatorsResDto,
       );
 
       return resultMapper;
    }
 
-   async getOperator(id: string): Promise<GetOpertorDto> {
+   async getOperator(id: string): Promise<GetOperatorResDto> {
       const parameters: ProcedureParameter[] = [
          {
-            variableName: "peOperatorId",
+            variableName: "piOperatorId",
             typeVariable: sql.UniqueIdentifier,
             value: id,
          },
@@ -38,13 +43,102 @@ export class OperatorsService {
          parameters,
       );
       if (!result) {
-         return {} as GetOpertorsDto;
+         return {} as GetOperatorResDto;
       }
-      const resultMapper: GetOpertorDto = {
+      const resultMapper: GetOperatorResDto = {
          OperatorId: result.OperatorId ?? "",
          Name: result.Name ?? "",
-      } as GetOpertorDto;
+      } as GetOperatorResDto;
 
       return resultMapper;
+   }
+
+   async createOperator(
+      pBody: CreateOperatorReqDto,
+   ): Promise<CreateOperatorResDto> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piName",
+            typeVariable: sql.VarChar(10),
+            value: pBody.Name,
+         },
+         {
+            variableName: "piIsActive",
+            typeVariable: sql.Bit,
+            value: pBody.IsActive,
+         },
+         {
+            variableName: "piCreationDate",
+            typeVariable: sql.DateTime,
+            value: pBody.CreationDate,
+         },
+      ];
+      const result = await this.mssql.executeProcedure(
+         "spCreateOperator",
+         parameters,
+      );
+      if (!result) {
+         return {} as CreateOperatorResDto;
+      }
+      const resultMapper: CreateOperatorResDto = {
+         OperatorId: result.OperatorId ?? "",
+         Name: result.Name ?? "",
+         IsActive: result.IsActive ?? false,
+         CreationDate: result.CreationDate ?? new Date(),
+      } as CreateOperatorResDto;
+
+      return resultMapper;
+   }
+
+   async updateOperator(
+      pId: string,
+      pdata: UpdateOperatorReqDto,
+   ): Promise<UpdateOperatorResDto> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piOperatorId",
+            typeVariable: sql.UniqueIdentifier,
+            value: pId,
+         },
+         {
+            variableName: "piName",
+            typeVariable: sql.VarChar(15),
+            value: pdata.Name,
+         },
+         {
+            variableName: "piIsActive",
+            typeVariable: sql.Bit,
+            value: pdata.IsActive,
+         },
+      ];
+      const result = await this.mssql.executeProcedure(
+         "spUpdateOperator",
+         parameters,
+      );
+      if (!result) {
+         return {} as UpdateOperatorResDto;
+      }
+      const resultMapper: UpdateOperatorResDto = {
+         OperatorId: result.OperatorId ?? "",
+         Name: result.Name ?? "",
+         IsActive: result.IsActive ?? false,
+         CreationDate: result.CreationDate ?? new Date(),
+      } as UpdateOperatorResDto;
+
+      return resultMapper;
+   }
+
+   async deleteOperator(pId: string): Promise<boolean> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piOperatorId",
+            typeVariable: sql.UniqueIdentifier,
+            value: pId,
+         },
+      ];
+      return await this.mssql.executeProcedureIsSuccess(
+         "spDeleteOperator",
+         parameters,
+      );
    }
 }

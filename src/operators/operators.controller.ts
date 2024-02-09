@@ -1,14 +1,27 @@
-import { Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import {
+   Body,
+   Controller,
+   Delete,
+   Get,
+   Param,
+   Post,
+   Put,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { OperatorsService } from "./operators.service";
-import { GetOpertorsDto } from "./dto/get-operators.dto";
-import { ResponseDto } from "src/responses/response.dto";
 import { ResponsesService } from "src/responses/responses.service";
 import {
+   ApiModelResponse,
    ApiModelResponseArray,
    ApiModelResponseObject,
 } from "src/responses/response.model";
-import { GetOpertorDto } from "./dto/get-operator.dto";
+import { ResponseResDto } from "src/responses/response-res.dto";
+import { GetOperatorsResDto } from "./dto/responses/get-operators-res.dto";
+import { GetOperatorResDto } from "./dto/responses/get-operator-res.dto";
+import { CreateOperatorResDto } from "./dto/responses/create-operator-res.dto";
+import { CreateOperatorReqDto } from "./dto/requests/create-operator-req.dto";
+import { UpdateOperatorResDto } from "./dto/responses/update-operator-res.dto";
+import { UpdateOperatorReqDto } from "./dto/requests/update-operator-req.dto";
 
 @ApiTags("Operators")
 @Controller("operators")
@@ -16,49 +29,57 @@ export class OperatorsController {
    constructor(private srvOperador: OperatorsService) {}
 
    @Get()
-   @ApiModelResponseArray(GetOpertorsDto)
-   async getOperators(): Promise<ResponseDto<GetOpertorsDto[]>> {
-      const result = new ResponsesService<GetOpertorsDto[]>();
+   @ApiModelResponseArray(GetOperatorsResDto)
+   async getOperators(): Promise<ResponseResDto<GetOperatorsResDto[]>> {
+      const result = new ResponsesService<GetOperatorsResDto[]>();
 
       return result.repuestaCorrecta(await this.srvOperador.getOperators());
    }
 
    @Get(":id")
-   @ApiModelResponseObject(GetOpertorDto)
+   @ApiModelResponseObject(GetOperatorResDto)
    async getOperator(
       @Param("id") id: string,
-   ): Promise<ResponseDto<GetOpertorDto>> {
-      const result = new ResponsesService<GetOpertorDto>();
+   ): Promise<ResponseResDto<GetOperatorResDto>> {
+      const result = new ResponsesService<GetOperatorResDto>();
 
       return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
+   }
+
+   @Post()
+   @ApiModelResponseObject(CreateOperatorResDto)
+   async createOperator(
+      @Body() pBody: CreateOperatorReqDto,
+   ): Promise<ResponseResDto<CreateOperatorResDto>> {
+      const result = new ResponsesService<CreateOperatorResDto>();
+
+      return result.repuestaCorrecta(
+         await this.srvOperador.createOperator(pBody),
+      );
    }
 
    @Put(":id")
-   @ApiModelResponseObject(GetOpertorDto)
+   @ApiModelResponseObject(UpdateOperatorResDto)
    async updateOperator(
-      @Param("id") id: string,
-   ): Promise<ResponseDto<GetOpertorDto>> {
-      const result = new ResponsesService<GetOpertorDto>();
+      @Param("id") pId: string,
+      @Body() pBody: UpdateOperatorReqDto,
+   ): Promise<ResponseResDto<UpdateOperatorResDto>> {
+      const result = new ResponsesService<UpdateOperatorResDto>();
 
-      return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
+      return result.repuestaCorrecta(
+         await this.srvOperador.updateOperator(pId, pBody),
+      );
    }
 
-   @Post(":id")
-   @ApiModelResponseObject(GetOpertorDto)
-   async createOperator(
-      @Param("id") id: string,
-   ): Promise<ResponseDto<GetOpertorDto>> {
-      const result = new ResponsesService<GetOpertorDto>();
-
-      return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
-   }
    @Delete(":id")
-   @ApiModelResponseObject(GetOpertorDto)
+   @ApiModelResponse("boolean")
    async deleteOperator(
-      @Param("id") id: string,
-   ): Promise<ResponseDto<GetOpertorDto>> {
-      const result = new ResponsesService<GetOpertorDto>();
+      @Param("id") pId: string,
+   ): Promise<ResponseResDto<boolean>> {
+      const result = new ResponsesService<boolean>();
 
-      return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
+      return result.repuestaCorrecta(
+         await this.srvOperador.deleteOperator(pId),
+      );
    }
 }

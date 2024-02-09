@@ -4,7 +4,7 @@ import * as sql from "mssql";
 export interface ProcedureParameter {
    variableName: string;
    typeVariable: sql.Int | sql.Varchar;
-   value: string;
+   value: string | number | boolean | Date;
 }
 
 @Injectable()
@@ -53,7 +53,7 @@ export class MSSQLService {
 
    async executeProcedureList(
       nameProcedure: string,
-      parameters: ProcedureParameter[],
+      parameters: ProcedureParameter[] = [],
    ): Promise<any> {
       try {
          const request = this.pool.request();
@@ -62,6 +62,23 @@ export class MSSQLService {
          });
          const result = await request.execute(nameProcedure);
          return result.recordset;
+      } catch (error) {
+         console.error("Error al ejecutar la consulta:", error.message);
+      }
+   }
+
+   async executeProcedureIsSuccess(
+      nameProcedure: string,
+      parameters: ProcedureParameter[],
+   ): Promise<boolean> {
+      try {
+         const request = this.pool.request();
+         parameters.forEach((item: ProcedureParameter) => {
+            request.input(item.variableName, item.typeVariable, item.value);
+         });
+         await request.execute(nameProcedure);
+
+         return true;
       } catch (error) {
          console.error("Error al ejecutar la consulta:", error.message);
       }

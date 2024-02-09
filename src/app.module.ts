@@ -6,6 +6,10 @@ import { OperatorsService } from "./operators/operators.service";
 import { ResponsesService } from "./responses/responses.service";
 import { MSSQLService } from "./db/mssql.service";
 import { ConfigModule } from "@nestjs/config";
+import { PrivilegiesController } from './privilegies/privilegies.controller';
+import { PrivilegiesService } from './privilegies/privilegies.service';
+import { CompaniesController } from './companies/companies.controller';
+import { CompaniesService } from './companies/companies.service';
 
 @Module({
    imports: [
@@ -13,7 +17,7 @@ import { ConfigModule } from "@nestjs/config";
          isGlobal: true,
       }),
    ],
-   controllers: [UsersController, OperatorsController],
-   providers: [MSSQLService, UsersService, OperatorsService, ResponsesService],
+   controllers: [UsersController, OperatorsController, PrivilegiesController, CompaniesController],
+   providers: [MSSQLService, UsersService, OperatorsService, ResponsesService, PrivilegiesService, CompaniesService],
 })
 export class AppModule {}

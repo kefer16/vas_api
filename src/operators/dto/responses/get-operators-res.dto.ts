@@ -1,4 +1,4 @@
-export class GetOpertorDto {
+export class GetOperatorsResDto {
    OperatorId: string;
    Name: string;
 }

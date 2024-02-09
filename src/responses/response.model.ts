@@ -6,19 +6,19 @@ import {
    ApiUnauthorizedResponse,
    getSchemaPath,
 } from "@nestjs/swagger";
-import { ResponseDto } from "./response.dto";
-import { ErrorDto } from "src/errors/error.dto";
+import { ResponseResDto } from "./response-res.dto";
+import { ErrorResDto } from "src/errors/error-res.dto";
 
 export const ApiModelResponseArray = <TModel extends Type<any>>(
    model: TModel,
 ) => {
    return applyDecorators(
-      ApiExtraModels(ResponseDto, model),
+      ApiExtraModels(ResponseResDto, model),
       ApiOkResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             allOf: [
-               { $ref: getSchemaPath(ResponseDto) },
+               { $ref: getSchemaPath(ResponseResDto) },
                {
                   properties: {
                      data: {
@@ -32,23 +32,23 @@ export const ApiModelResponseArray = <TModel extends Type<any>>(
       }),
       ApiBadRequestResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 400 },
                data: { type: "array", default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
       ApiUnauthorizedResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 401 },
                data: { type: "array", default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -59,11 +59,11 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
    model: TModel,
 ) => {
    return applyDecorators(
-      ApiExtraModels(ResponseDto, model),
+      ApiExtraModels(ResponseResDto, model),
       ApiOkResponse({
          schema: {
             title: "RespuestaDto",
-            $ref: getSchemaPath(ResponseDto),
+            $ref: getSchemaPath(ResponseResDto),
             properties: {
                data: {
                   $ref: getSchemaPath(model),
@@ -73,23 +73,23 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
       }),
       ApiBadRequestResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 400 },
                data: { type: "object", default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
       ApiUnauthorizedResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 401 },
                data: { type: "object", default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -100,38 +100,38 @@ export const ApiModelResponse = (
    tipoDeDato: "number" | "string" | "boolean",
 ) => {
    return applyDecorators(
-      ApiExtraModels(ResponseDto),
+      ApiExtraModels(ResponseResDto),
       ApiOkResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
 
             properties: {
                code: { type: "number" },
                data: { type: tipoDeDato },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
       ApiBadRequestResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 400 },
                data: { type: tipoDeDato, default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
       ApiUnauthorizedResponse({
          schema: {
-            title: "RespuestaDto",
+            title: "ResponseResDto",
             type: "object",
             properties: {
                code: { type: "number", default: 401 },
                data: { type: tipoDeDato, default: null },
-               error: { $ref: getSchemaPath(ErrorDto) },
+               error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
