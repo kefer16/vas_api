@@ -1,13 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/db/mssql.service";
-
-import * as sql from "mssql";
 import { GetOperatorsResDto } from "./dto/responses/get-operators-res.dto";
 import { GetOperatorResDto } from "./dto/responses/get-operator-res.dto";
 import { CreateOperatorReqDto } from "./dto/requests/create-operator-req.dto";
 import { CreateOperatorResDto } from "./dto/responses/create-operator-res.dto";
 import { UpdateOperatorReqDto } from "./dto/requests/update-operator-req.dto";
 import { UpdateOperatorResDto } from "./dto/responses/update-operator-res.dto";
+import { Bit, DateTime, UniqueIdentifier, VarChar } from "mssql";
 
 @Injectable()
 export class OperatorsService {
@@ -34,7 +33,7 @@ export class OperatorsService {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piOperatorId",
-            typeVariable: sql.UniqueIdentifier,
+            typeVariable: UniqueIdentifier,
             value: id,
          },
       ];
@@ -59,17 +58,17 @@ export class OperatorsService {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piName",
-            typeVariable: sql.VarChar(10),
+            typeVariable: VarChar(10),
             value: pBody.Name,
          },
          {
             variableName: "piIsActive",
-            typeVariable: sql.Bit,
+            typeVariable: Bit,
             value: pBody.IsActive,
          },
          {
             variableName: "piCreationDate",
-            typeVariable: sql.DateTime,
+            typeVariable: DateTime,
             value: pBody.CreationDate,
          },
       ];
@@ -97,17 +96,17 @@ export class OperatorsService {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piOperatorId",
-            typeVariable: sql.UniqueIdentifier,
+            typeVariable: UniqueIdentifier,
             value: pId,
          },
          {
             variableName: "piName",
-            typeVariable: sql.VarChar(15),
+            typeVariable: VarChar(15),
             value: pdata.Name,
          },
          {
             variableName: "piIsActive",
-            typeVariable: sql.Bit,
+            typeVariable: Bit,
             value: pdata.IsActive,
          },
       ];
@@ -132,7 +131,7 @@ export class OperatorsService {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piOperatorId",
-            typeVariable: sql.UniqueIdentifier,
+            typeVariable: UniqueIdentifier,
             value: pId,
          },
       ];

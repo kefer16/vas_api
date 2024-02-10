@@ -1,15 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import * as sql from "mssql";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { ConnectionPool, ISqlType } from "mssql";
 
 export interface ProcedureParameter {
    variableName: string;
-   typeVariable: sql.Int | sql.Varchar;
+   typeVariable: (() => ISqlType) | ISqlType;
    value: string | number | boolean | Date;
 }
 
 @Injectable()
 export class MSSQLService {
-   private pool: sql.ConnectionPool;
+   private pool: ConnectionPool;
 
    constructor() {
       this.connect();
@@ -17,7 +17,7 @@ export class MSSQLService {
 
    private async connect() {
       try {
-         this.pool = await new sql.ConnectionPool({
+         this.pool = await new ConnectionPool({
             user: process.env.DB_USER ?? "",
             password: process.env.DB_PASSWORD ?? "",
             server: process.env.DB_SERVER ?? "",
@@ -36,7 +36,7 @@ export class MSSQLService {
 
    async executeProcedure(
       nameProcedure: string,
-      parameters: ProcedureParameter[],
+      parameters: ProcedureParameter[] = [],
    ): Promise<any> {
       try {
          const request = this.pool.request();
@@ -47,7 +47,10 @@ export class MSSQLService {
 
          return result.recordset[0];
       } catch (error) {
-         console.error("Error al ejecutar la consulta:", error.message);
+         throw new HttpException(
+            `Error al ejecutar la consulta: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
       }
    }
 
@@ -63,7 +66,10 @@ export class MSSQLService {
          const result = await request.execute(nameProcedure);
          return result.recordset;
       } catch (error) {
-         console.error("Error al ejecutar la consulta:", error.message);
+         throw new HttpException(
+            `Error al ejecutar la consulta: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
       }
    }
 
@@ -80,7 +86,10 @@ export class MSSQLService {
 
          return true;
       } catch (error) {
-         console.error("Error al ejecutar la consulta:", error.message);
+         throw new HttpException(
+            `Error al ejecutar la consulta: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
       }
    }
 }

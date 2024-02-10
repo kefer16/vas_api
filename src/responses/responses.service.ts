@@ -11,4 +11,16 @@ export class ResponsesService<TData> {
       result.error = new ErrorResDto(false, "0", "");
       return result;
    }
+
+   repuestaErrorSQL(
+      pIsValidate: boolean,
+      pCode: string,
+      pMessage: string,
+   ): ResponseResDto<null> {
+      const result = new ResponseResDto<null>();
+      result.code = 400;
+      result.data = null;
+      result.error = new ErrorResDto(pIsValidate, pCode, pMessage);
+      return result;
+   }
 }

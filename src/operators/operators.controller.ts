@@ -36,16 +36,6 @@ export class OperatorsController {
       return result.repuestaCorrecta(await this.srvOperador.getOperators());
    }
 
-   @Get(":id")
-   @ApiModelResponseObject(GetOperatorResDto)
-   async getOperator(
-      @Param("id") id: string,
-   ): Promise<ResponseResDto<GetOperatorResDto>> {
-      const result = new ResponsesService<GetOperatorResDto>();
-
-      return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
-   }
-
    @Post()
    @ApiModelResponseObject(CreateOperatorResDto)
    async createOperator(
@@ -56,6 +46,16 @@ export class OperatorsController {
       return result.repuestaCorrecta(
          await this.srvOperador.createOperator(pBody),
       );
+   }
+
+   @Get(":id")
+   @ApiModelResponseObject(GetOperatorResDto)
+   async getOperator(
+      @Param("id") id: string,
+   ): Promise<ResponseResDto<GetOperatorResDto>> {
+      const result = new ResponsesService<GetOperatorResDto>();
+
+      return result.repuestaCorrecta(await this.srvOperador.getOperator(id));
    }
 
    @Put(":id")
