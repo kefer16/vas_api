@@ -14,6 +14,8 @@ import { ErrorsService } from "./errors/errors.service";
 import { GlobalMiddleware } from "./global/global.middleware";
 import { APP_FILTER } from "@nestjs/core";
 import { HttpExceptionFilter } from "./http-exception/http-exception.filter";
+import { ModulesService } from './modules/modules.service';
+import { ModulesController } from './modules/modules.controller';
 
 @Module({
    imports: [
@@ -26,6 +28,7 @@ import { HttpExceptionFilter } from "./http-exception/http-exception.filter";
       OperatorsController,
       PrivilegiesController,
       CompaniesController,
+      ModulesController,
    ],
    providers: [
       MSSQLService,
@@ -39,6 +42,7 @@ import { HttpExceptionFilter } from "./http-exception/http-exception.filter";
          provide: APP_FILTER,
          useClass: HttpExceptionFilter,
       },
+      ModulesService,
    ],
 })
 export class AppModule implements NestModule {
