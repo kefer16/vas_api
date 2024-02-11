@@ -7,10 +7,15 @@ async function bootstrap() {
    app.useGlobalFilters(new HttpExceptionFilter());
    const config = new DocumentBuilder()
       .setTitle("Api Vas")
-      .setDescription("API Rest para uso exclusivo del aplicativo Vas")
+      .setDescription(
+         `API Rest para uso exclusivo del aplicativo Vas. <br />
+         <br />
+         Links: [JSON Swagger](${process.env.API_SERVER ?? "http://localhost:3000/"}swagger-json)`,
+      )
       .setVersion("1.0")
       .addBearerAuth()
-      .setExternalDoc("JSON", "swagger-json")
+      .addServer(`${process.env.API_SERVER ?? "http://localhost:3000/"}`)
+      // .setExternalDoc("JSON", "swagger-json")
       .build();
    app.setGlobalPrefix("v1");
    const document = SwaggerModule.createDocument(app, config);
