@@ -1,6 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { ResponsesService } from "src/responses/responses.service";
-
 @Injectable()
 export class ErrorsService {
    obtenerFechaLocal = (): string => {
@@ -20,9 +18,9 @@ export class ErrorsService {
          return "";
       }
    }
-   grabarErrorSQL(pError: Error) {
-      const result = new ResponsesService<null>();
+   // grabarErrorSQL(pError: Error) {
+   //    const result = new ResponsesService<null>();
 
-      return result.repuestaErrorSQL(true, "0", pError.message);
-   }
+   //    return result.repuestaErrorSQL(true, "0", pError.message);
+   // }
 }

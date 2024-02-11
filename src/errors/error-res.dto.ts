@@ -6,13 +6,11 @@ export class ErrorPersonalizado extends Error {
 }
 
 export class ErrorResDto {
-   isValidate: boolean;
-   code: string;
-   message: string;
+   IsValidate: boolean;
+   Message: string;
 
-   constructor(_isValidate: boolean, _code: string, _message: string) {
-      this.isValidate = _isValidate;
-      this.code = _code;
-      this.message = _message;
+   constructor(pIsValidate: boolean, pMessage: string) {
+      this.IsValidate = pIsValidate;
+      this.Message = pMessage;
    }
 }

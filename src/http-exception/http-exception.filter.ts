@@ -13,14 +13,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const response = ctx.getResponse<Response>();
       // const request = ctx.getRequest<Request>();
       const status = exception.getStatus();
-
+      const isValidation = exception.message.includes("[VAL]");
       response.status(status).json({
-         code: status,
-         data: null,
-         error: {
-            isValidate: true,
-            code: "0",
-            message: exception.message,
+         Code: status,
+         Data: null,
+         Error: {
+            IsValidate: isValidation,
+            Message: isValidation
+               ? exception.message.replace("[VAL]", "")
+               : "Ocurrió un Error",
          },
       });
    }

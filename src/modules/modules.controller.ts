@@ -7,7 +7,7 @@ import {
    Post,
    Put,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ModulesService } from "./modules.service";
 import {
    ApiModelResponse,
@@ -19,7 +19,7 @@ import { ResponseResDto } from "src/responses/response-res.dto";
 import { ResponsesService } from "src/responses/responses.service";
 import { CreateModuleReqDto } from "./dto/requests/create-module-req.dto";
 import { UpdateModuleReqDto } from "./dto/requests/update-module-req.dto";
-
+@ApiBearerAuth()
 @ApiTags("Modules")
 @Controller("modules")
 export class ModulesController {

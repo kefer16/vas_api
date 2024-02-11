@@ -4,8 +4,8 @@ import { ApiModelResponseArray } from "src/responses/response.model";
 import { ResponseResDto } from "src/responses/response-res.dto";
 import { GetPrivilegiesResDto } from "./dto/responses/get-privilegies-res.dto";
 import { ResponsesService } from "src/responses/responses.service";
-import { ApiTags } from "@nestjs/swagger";
-
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+@ApiBearerAuth()
 @ApiTags("Privilegies")
 @Controller("privilegies")
 export class PrivilegiesController {

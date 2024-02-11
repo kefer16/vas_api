@@ -7,7 +7,7 @@ import {
    Post,
    Put,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { OperatorsService } from "./operators.service";
 import { ResponsesService } from "src/responses/responses.service";
 import {
@@ -22,7 +22,7 @@ import { CreateOperatorResDto } from "./dto/responses/create-operator-res.dto";
 import { CreateOperatorReqDto } from "./dto/requests/create-operator-req.dto";
 import { UpdateOperatorResDto } from "./dto/responses/update-operator-res.dto";
 import { UpdateOperatorReqDto } from "./dto/requests/update-operator-req.dto";
-
+@ApiBearerAuth()
 @ApiTags("Operators")
 @Controller("operators")
 export class OperatorsController {

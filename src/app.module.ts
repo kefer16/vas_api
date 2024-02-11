@@ -14,8 +14,8 @@ import { ErrorsService } from "./errors/errors.service";
 import { GlobalMiddleware } from "./global/global.middleware";
 import { APP_FILTER } from "@nestjs/core";
 import { HttpExceptionFilter } from "./http-exception/http-exception.filter";
-import { ModulesService } from './modules/modules.service';
-import { ModulesController } from './modules/modules.controller';
+import { ModulesService } from "./modules/modules.service";
+import { ModulesController } from "./modules/modules.controller";
 
 @Module({
    imports: [
@@ -47,6 +47,13 @@ import { ModulesController } from './modules/modules.controller';
 })
 export class AppModule implements NestModule {
    configure(consumer: MiddlewareConsumer) {
-      consumer.apply(GlobalMiddleware).forRoutes(CompaniesController);
+      consumer
+         .apply(GlobalMiddleware)
+         .forRoutes(
+            OperatorsController,
+            PrivilegiesController,
+            CompaniesController,
+            ModulesController,
+         );
    }
 }

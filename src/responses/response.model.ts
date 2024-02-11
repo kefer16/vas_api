@@ -1,7 +1,8 @@
-import { Type, applyDecorators } from "@nestjs/common";
+import { HttpStatus, Type, applyDecorators } from "@nestjs/common";
 import {
    ApiBadRequestResponse,
    ApiExtraModels,
+   ApiInternalServerErrorResponse,
    ApiOkResponse,
    ApiUnauthorizedResponse,
    getSchemaPath,
@@ -21,7 +22,7 @@ export const ApiModelResponseArray = <TModel extends Type<any>>(
                { $ref: getSchemaPath(ResponseResDto) },
                {
                   properties: {
-                     data: {
+                     Data: {
                         type: "array",
                         items: { $ref: getSchemaPath(model) },
                      },
@@ -35,9 +36,9 @@ export const ApiModelResponseArray = <TModel extends Type<any>>(
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 400 },
-               data: { type: "array", default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.BAD_REQUEST },
+               Data: { type: "array", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -46,9 +47,23 @@ export const ApiModelResponseArray = <TModel extends Type<any>>(
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 401 },
-               data: { type: "array", default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.UNAUTHORIZED },
+               Data: { type: "array", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
+            },
+         },
+      }),
+      ApiInternalServerErrorResponse({
+         schema: {
+            title: "ResponseResDto",
+            type: "object",
+            properties: {
+               Code: {
+                  type: "number",
+                  default: HttpStatus.INTERNAL_SERVER_ERROR,
+               },
+               Data: { type: "array", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -65,7 +80,7 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
             title: "RespuestaDto",
             $ref: getSchemaPath(ResponseResDto),
             properties: {
-               data: {
+               Data: {
                   $ref: getSchemaPath(model),
                },
             },
@@ -76,9 +91,9 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 400 },
-               data: { type: "object", default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.BAD_REQUEST },
+               Data: { type: "object", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -87,9 +102,23 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 401 },
-               data: { type: "object", default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.UNAUTHORIZED },
+               Data: { type: "object", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
+            },
+         },
+      }),
+      ApiInternalServerErrorResponse({
+         schema: {
+            title: "ResponseResDto",
+            type: "object",
+            properties: {
+               Code: {
+                  type: "number",
+                  default: HttpStatus.INTERNAL_SERVER_ERROR,
+               },
+               Data: { type: "object", default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -105,11 +134,10 @@ export const ApiModelResponse = (
          schema: {
             title: "ResponseResDto",
             type: "object",
-
             properties: {
-               code: { type: "number" },
-               data: { type: tipoDeDato },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number" },
+               Data: { type: tipoDeDato },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -118,9 +146,9 @@ export const ApiModelResponse = (
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 400 },
-               data: { type: tipoDeDato, default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.BAD_REQUEST },
+               Data: { type: tipoDeDato, default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),
@@ -129,9 +157,23 @@ export const ApiModelResponse = (
             title: "ResponseResDto",
             type: "object",
             properties: {
-               code: { type: "number", default: 401 },
-               data: { type: tipoDeDato, default: null },
-               error: { $ref: getSchemaPath(ErrorResDto) },
+               Code: { type: "number", default: HttpStatus.UNAUTHORIZED },
+               Data: { type: tipoDeDato, default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
+            },
+         },
+      }),
+      ApiInternalServerErrorResponse({
+         schema: {
+            title: "ResponseResDto",
+            type: "object",
+            properties: {
+               Code: {
+                  type: "number",
+                  default: HttpStatus.INTERNAL_SERVER_ERROR,
+               },
+               Data: { type: tipoDeDato, default: null },
+               Error: { $ref: getSchemaPath(ErrorResDto) },
             },
          },
       }),

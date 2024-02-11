@@ -6,9 +6,8 @@ import {
    Param,
    Post,
    Put,
-   UseFilters,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CompaniesService } from "./companies.service";
 import { GetCompaniesResDto } from "./dto/responses/get-companies-res.dto";
 import { ResponseResDto } from "src/responses/response-res.dto";
@@ -23,9 +22,7 @@ import { CreateCompanyResDto } from "./dto/responses/create-company-res.dto";
 import { CreateCompanyReqDto } from "./dto/requests/create-company-req.dto";
 import { UpdateCompanyReqDto } from "./dto/requests/update-company-req.dto";
 import { UpdateCompanyResDto } from "./dto/responses/update-company-res.dto";
-import { HttpExceptionFilter } from "src/http-exception/http-exception.filter";
-
-@UseFilters(new HttpExceptionFilter())
+@ApiBearerAuth()
 @ApiTags("Companies")
 @Controller("companies")
 export class CompaniesController {
