@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MSSQLService } from "src/db/mssql.service";
+import { MSSQLService } from "src/mssql/mssql.service";
 import { GetPrivilegiesResDto } from "./dto/responses/get-privilegies-res.dto";
 
 @Injectable()

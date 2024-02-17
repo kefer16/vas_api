@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MSSQLService, ProcedureParameter } from "src/db/mssql.service";
+import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 import { GetOperatorsResDto } from "./dto/responses/get-operators-res.dto";
 import { GetOperatorResDto } from "./dto/responses/get-operator-res.dto";
 import { CreateOperatorReqDto } from "./dto/requests/create-operator-req.dto";

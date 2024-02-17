@@ -1,3 +1,7 @@
 export class CreateUserReqDto {
-   UserId: string;
+   UserName: string;
+   Password: string;
+   Email: string;
+   CodeConfirmation: string;
+   CreationDate: Date;
 }

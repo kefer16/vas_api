@@ -13,7 +13,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const response = ctx.getResponse<Response>();
       // const request = ctx.getRequest<Request>();
       const status = exception.getStatus();
-      const isValidation = exception.message.includes("[VAL]");
+      // const isValidation = exception.message.includes("[VAL]");
+      const isValidation = true;
       response.status(status).json({
          Code: status,
          Data: null,

@@ -1,13 +1,16 @@
-import { Injectable } from "@nestjs/common";
-import { MSSQLService, ProcedureParameter } from "src/db/mssql.service";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 import { UserResDto } from "./dto/responses/user-res.dto";
-import { UniqueIdentifier, VarChar } from "mssql";
+import { DateTime, UniqueIdentifier, VarChar } from "mssql";
 import { CreateUserReqDto } from "./dto/requests/create-user-req.dto";
 import { UpdateUserReqDto } from "./dto/requests/update-user-req.dto";
-
+import { encrypt } from "src/utils/bcrypt.util";
 @Injectable()
 export class UsersService {
-   constructor(private srvMSSQL: MSSQLService) {}
+   constructor(
+      private srvMSSQL: MSSQLService,
+      // private srvAutUser: AuthorizationsUsersService,
+   ) {}
 
    async getModules(): Promise<UserResDto[]> {
       const result = await this.srvMSSQL.executeProcedure("spGetModules");
@@ -35,23 +38,93 @@ export class UsersService {
       return resultMapper[0];
    }
 
-   async createModule(pBody: CreateUserReqDto): Promise<UserResDto> {
+   async countUserNameRepeat(pUserName: string): Promise<number> {
       const parameters: ProcedureParameter[] = [
          {
-            variableName: "piName",
-            typeVariable: VarChar(300),
-            value: pBody.UserId,
+            variableName: "piUserName",
+            typeVariable: VarChar(45),
+            value: pUserName,
          },
       ];
 
-      const result = await this.srvMSSQL.executeProcedure(
-         "spCreateModule",
+      return await this.srvMSSQL.executeProcedureCount(
+         "spFindRepeatUserName",
          parameters,
       );
+   }
+   async countEmailRepeat(pEmail: string): Promise<number> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piEmail",
+            typeVariable: VarChar(45),
+            value: pEmail,
+         },
+      ];
 
-      const resultMapper: UserResDto[] = JSON.parse(result.JSON);
+      return await this.srvMSSQL.executeProcedureCount(
+         "spFindRepeatEmail",
+         parameters,
+      );
+   }
 
-      return resultMapper[0];
+   async createUser(pBody: CreateUserReqDto): Promise<boolean> {
+      const countUserNameRepeat = await this.countUserNameRepeat(
+         pBody.UserName,
+      );
+
+      if (countUserNameRepeat > 0) {
+         throw new HttpException(
+            "El nombre de usuario ya existe",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
+      const countEmailRepeat = await this.countEmailRepeat(pBody.Email);
+      if (countEmailRepeat > 0) {
+         throw new HttpException("El correo ya existe", HttpStatus.BAD_REQUEST);
+      }
+
+      // const countAuthorizationUser =
+      //    await this.srvAutUser.countAuthorizationUser(
+      //       pBody.Email,
+      //       pBody.CodeConfirmation,
+      //    );
+
+      // if (countAuthorizationUser <= 0) {
+      //    throw new HttpException(
+      //       "No existe niguna confirmación pendiente para este correo",
+      //       HttpStatus.BAD_REQUEST,
+      //    );
+      // }
+
+      pBody.Password = await encrypt(pBody.Password);
+
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "peUserName",
+            typeVariable: VarChar(45),
+            value: pBody.UserName,
+         },
+         {
+            variableName: "pePassword",
+            typeVariable: VarChar(150),
+            value: pBody.Password,
+         },
+         {
+            variableName: "peEmail",
+            typeVariable: VarChar(150),
+            value: pBody.Email,
+         },
+         {
+            variableName: "peCreationDate",
+            typeVariable: DateTime,
+            value: pBody.CreationDate,
+         },
+      ];
+
+      return await this.srvMSSQL.executeProcedureIsSuccess(
+         "spCreateUser",
+         parameters,
+      );
    }
 
    async updateModule(

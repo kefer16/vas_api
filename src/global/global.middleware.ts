@@ -5,7 +5,7 @@ import {
    NestMiddleware,
 } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
-import { MSSQLService, ProcedureParameter } from "src/db/mssql.service";
+import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 import { UniqueIdentifier } from "mssql";
 import { ValidGlobalResDto } from "./dto/responses/valid-global-res.dto";
 

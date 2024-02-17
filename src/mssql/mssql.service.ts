@@ -92,4 +92,42 @@ export class MSSQLService {
          );
       }
    }
+
+   async executeProcedureCount(
+      nameProcedure: string,
+      parameters: ProcedureParameter[],
+   ): Promise<number> {
+      try {
+         const request = this.pool.request();
+         parameters.forEach((item: ProcedureParameter) => {
+            request.input(item.variableName, item.typeVariable, item.value);
+         });
+         const result = await request.execute(nameProcedure);
+         return result.recordset[0].COUNT;
+      } catch (error) {
+         throw new HttpException(
+            `Error al ejecutar la consulta: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
+      }
+   }
+
+   async executeProcedureJSON(
+      nameProcedure: string,
+      parameters: ProcedureParameter[],
+   ): Promise<string> {
+      try {
+         const request = this.pool.request();
+         parameters.forEach((item: ProcedureParameter) => {
+            request.input(item.variableName, item.typeVariable, item.value);
+         });
+         const result = await request.execute(nameProcedure);
+         return result.recordset[0].JSON;
+      } catch (error) {
+         throw new HttpException(
+            `Error al ejecutar la consulta: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+         );
+      }
+   }
 }
