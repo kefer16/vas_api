@@ -62,7 +62,7 @@ export class AccountsService {
          );
       }
 
-      await this.srvEmail.sendEmailAuthorization(pBody.Email, TOKEN);
+      // await this.srvEmail.sendEmailAuthorization(pBody.Email, TOKEN);
 
       return true;
    }
