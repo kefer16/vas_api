@@ -7,7 +7,7 @@ import { CreateAccountReqDto } from "./dto/requests/create-account-req.dto";
 import { EmailsService } from "src/emails/emails.service";
 
 @Injectable()
-export class AuthorizationsUsersService {
+export class AccountsService {
    constructor(
       private srvAuth: AuthorizationsService,
       private srvUser: UsersService,
