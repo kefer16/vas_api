@@ -45,7 +45,7 @@ export class MSSQLService {
          });
          const result = await request.execute(nameProcedure);
 
-         return result.recordset[0];
+         return result.recordset[0].JSON;
       } catch (error) {
          throw new HttpException(
             `Error al ejecutar la consulta: ${error.message}`,

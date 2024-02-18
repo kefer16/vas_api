@@ -25,6 +25,21 @@ export class AuthorizationsService {
       );
    }
 
+   async countActiveAuthorization(pUserName: string): Promise<number> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piUsername",
+            typeVariable: VarChar(45),
+            value: pUserName,
+         },
+      ];
+
+      return await this.srvMSSQL.executeProcedureCount(
+         "spCountActiveAuthorization",
+         parameters,
+      );
+   }
+
    async createAthorization(
       pEmail: string,
       pToken: string,

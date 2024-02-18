@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 import { DateTime, VarChar } from "mssql";
 import { encrypt } from "src/utils/bcrypt.util";
+import { GetPasswordUserDto } from "./dto/requests/get-password-user.dto";
+import { LoginAccountResDto } from "src/accounts/dto/responses/login-account-res.dto";
 @Injectable()
 export class UsersService {
    constructor(private srvMSSQL: MSSQLService) {}
@@ -70,5 +72,39 @@ export class UsersService {
          "spCreateUser",
          parameters,
       );
+   }
+
+   async getPassword(pUserName: string): Promise<GetPasswordUserDto> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piUserName",
+            typeVariable: VarChar(45),
+            value: pUserName,
+         },
+      ];
+
+      const result = await this.srvMSSQL.executeProcedureJSON(
+         "spGetPasswordUser",
+         parameters,
+      );
+      const resultMapper: GetPasswordUserDto = JSON.parse(result);
+      return resultMapper;
+   }
+
+   async getUser(pUserName: string): Promise<LoginAccountResDto> {
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piUserName",
+            typeVariable: VarChar(45),
+            value: pUserName,
+         },
+      ];
+
+      const result = await this.srvMSSQL.executeProcedureJSON(
+         "spGetUser",
+         parameters,
+      );
+      const resultMapper: LoginAccountResDto = JSON.parse(result);
+      return resultMapper;
    }
 }

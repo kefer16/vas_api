@@ -5,6 +5,9 @@ import { generateNumberRandom } from "src/utils/util.utils";
 import { ActiveAccountReqDto } from "./dto/requests/active-account-req.dto";
 import { CreateAccountReqDto } from "./dto/requests/create-account-req.dto";
 import { EmailsService } from "src/emails/emails.service";
+import { LoginAccountReqDto } from "./dto/requests/login-account-req.dto";
+import { comparePassword } from "src/utils/bcrypt.util";
+import { LoginAccountResDto } from "./dto/responses/login-account-res.dto";
 
 @Injectable()
 export class AccountsService {
@@ -92,5 +95,41 @@ export class AccountsService {
       }
 
       return true;
+   }
+
+   async loginAccount(pBody: LoginAccountReqDto): Promise<LoginAccountResDto> {
+      const countActiveAuthorization =
+         await this.srvAuth.countActiveAuthorization(pBody.UserName);
+
+      if (countActiveAuthorization <= 0) {
+         throw new HttpException(
+            "[VAL]Por favor, activa tu cuenta",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
+
+      if (countActiveAuthorization > 1) {
+         throw new HttpException(
+            "[VAL]Ocurrió un error al Iniciar Sesión",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
+
+      const getPassword = await this.srvUser.getPassword(pBody.UserName);
+      if (!getPassword.Password) {
+         throw new HttpException(
+            "[VAL]Usuario o contraseña incorrecta",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
+
+      if (!(await comparePassword(pBody.Password, getPassword.Password))) {
+         throw new HttpException(
+            "[VAL]Usuario o contraseña incorrecta",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
+
+      return await this.srvUser.getUser(pBody.UserName);
    }
 }
