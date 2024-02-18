@@ -1,10 +1,11 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, Put } from "@nestjs/common";
 import { ResponseResDto } from "src/responses/response-res.dto";
 import { ApiModelResponse } from "src/responses/response.model";
-import { CreateAuthorizacionUserReqDto } from "./dto/requests/create-authorizacion-user-req.dto";
 import { ResponsesService } from "src/responses/responses.service";
 import { AuthorizationsUsersService } from "./authorizations-users.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ActiveAccountReqDto } from "./dto/requests/active-account-req.dto";
+import { CreateAccountReqDto } from "./dto/requests/create-account-req.dto";
 
 @ApiBearerAuth()
 @ApiTags("Authorizations Users")
@@ -12,15 +13,27 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 export class AuthorizationsUsersController {
    constructor(private srvAuthoUser: AuthorizationsUsersService) {}
 
-   @Post("send-email")
+   @Post("create-account")
    @ApiModelResponse("boolean")
-   async createUser(
-      @Body() pBody: CreateAuthorizacionUserReqDto,
+   async createAccount(
+      @Body() pBody: CreateAccountReqDto,
    ): Promise<ResponseResDto<boolean>> {
       const result = new ResponsesService<boolean>();
 
       return result.repuestaCorrecta(
-         await this.srvAuthoUser.createAuthorizationUser(pBody),
+         await this.srvAuthoUser.createAccount(pBody),
+      );
+   }
+
+   @Put("activate-account")
+   @ApiModelResponse("boolean")
+   async activateAccount(
+      @Body() pBody: ActiveAccountReqDto,
+   ): Promise<ResponseResDto<boolean>> {
+      const result = new ResponsesService<boolean>();
+
+      return result.repuestaCorrecta(
+         await this.srvAuthoUser.activateAccount(pBody),
       );
    }
 }

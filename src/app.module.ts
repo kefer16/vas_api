@@ -14,6 +14,8 @@ import { ModulesModule } from "./modules/modules.module";
 import { PrivilegesModule } from "./privileges/privileges.module";
 import { ResponsesService } from "./responses/responses.service";
 import { AuthorizationsModule } from "./authorizations/authorizations.module";
+import { EmailsModule } from "./emails/emails.module";
+import { AuthorizationsUsersController } from "./authorizations-users/authorizations-users.controller";
 
 @Module({
    imports: [
@@ -27,6 +29,7 @@ import { AuthorizationsModule } from "./authorizations/authorizations.module";
       ModulesModule,
       PrivilegesModule,
       AuthorizationsModule,
+      EmailsModule,
    ],
    providers: [
       ResponsesService,
@@ -42,6 +45,7 @@ export class AppModule implements NestModule {
          .apply(GlobalMiddleware)
          .forRoutes(
             PrivilegesController,
+            AuthorizationsUsersController,
             CompaniesController,
             ModulesController,
          );
