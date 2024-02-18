@@ -27,13 +27,11 @@ export class AuthorizationsUsersService {
          );
       }
 
-      const countRepeatEmail = await this.srvUser.countEmailRepeat(
-         pBody.UserName,
-      );
+      const countRepeatEmail = await this.srvUser.countEmailRepeat(pBody.Email);
 
       if (countRepeatEmail > 0) {
          throw new HttpException(
-            "[VAL]El email ya existe",
+            "[VAL]Usted ya tiene una cuenta",
             HttpStatus.BAD_REQUEST,
          );
       }
@@ -61,30 +59,7 @@ export class AuthorizationsUsersService {
       ];
 
       return await this.srvMSSQL.executeProcedureIsSuccess(
-         "spCreateAuthorizationUser",
-         parameters,
-      );
-   }
-
-   async countAuthorizationUser(
-      pEmail: string,
-      pCode: string,
-   ): Promise<number> {
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piEmail",
-            typeVariable: VarChar(45),
-            value: pEmail,
-         },
-         {
-            variableName: "piCode",
-            typeVariable: VarChar(6),
-            value: pCode,
-         },
-      ];
-
-      return await this.srvMSSQL.executeProcedureCount(
-         "countAuthorizationUser",
+         "spCreateAuthorization",
          parameters,
       );
    }

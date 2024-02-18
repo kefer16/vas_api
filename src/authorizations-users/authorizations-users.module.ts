@@ -4,9 +4,8 @@ import { AuthorizationsUsersController } from "./authorizations-users.controller
 import { UsersModule } from "src/users/users.module";
 
 @Module({
-   imports: [UsersModule],
+   imports: [UsersModule, AuthorizationsUsersModule],
    controllers: [AuthorizationsUsersController],
    providers: [AuthorizationsUsersService],
-   exports: [AuthorizationsUsersService],
 })
 export class AuthorizationsUsersModule {}

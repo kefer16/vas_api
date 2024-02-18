@@ -5,11 +5,12 @@ import { DateTime, UniqueIdentifier, VarChar } from "mssql";
 import { CreateUserReqDto } from "./dto/requests/create-user-req.dto";
 import { UpdateUserReqDto } from "./dto/requests/update-user-req.dto";
 import { encrypt } from "src/utils/bcrypt.util";
+import { AuthorizationsService } from "src/authorizations/authorizations.service";
 @Injectable()
 export class UsersService {
    constructor(
       private srvMSSQL: MSSQLService,
-      // private srvAutUser: AuthorizationsUsersService,
+      private srvAutho: AuthorizationsService,
    ) {}
 
    async getModules(): Promise<UserResDto[]> {
@@ -80,21 +81,23 @@ export class UsersService {
       }
       const countEmailRepeat = await this.countEmailRepeat(pBody.Email);
       if (countEmailRepeat > 0) {
-         throw new HttpException("El correo ya existe", HttpStatus.BAD_REQUEST);
+         throw new HttpException(
+            "Usted ya tiene una cuenta",
+            HttpStatus.BAD_REQUEST,
+         );
       }
 
-      // const countAuthorizationUser =
-      //    await this.srvAutUser.countAuthorizationUser(
-      //       pBody.Email,
-      //       pBody.CodeConfirmation,
-      //    );
+      const countAuthorizationUser = await this.srvAutho.countAuthorizationUser(
+         pBody.Email,
+         pBody.CodeConfirmation,
+      );
 
-      // if (countAuthorizationUser <= 0) {
-      //    throw new HttpException(
-      //       "No existe niguna confirmación pendiente para este correo",
-      //       HttpStatus.BAD_REQUEST,
-      //    );
-      // }
+      if (countAuthorizationUser <= 0) {
+         throw new HttpException(
+            "No existe niguna confirmación pendiente para este correo",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
 
       pBody.Password = await encrypt(pBody.Password);
 

@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { OperatorsController } from "./operators/operators.controller";
 import { ConfigModule } from "@nestjs/config";
-import { PrivilegiesController } from "./privilegies/privilegies.controller";
+import { PrivilegesController } from "./privileges/privileges.controller";
 import { CompaniesController } from "./companies/companies.controller";
 import { GlobalMiddleware } from "./global/global.middleware";
 import { APP_FILTER } from "@nestjs/core";
@@ -12,9 +11,9 @@ import { UsersModule } from "./users/users.module";
 import { MssqlModule } from "./mssql/mssql.module";
 import { CompaniesModule } from "./companies/companies.module";
 import { ModulesModule } from "./modules/modules.module";
-import { OperatorsModule } from "./operators/operators.module";
-import { PrivilegiesModule } from "./privilegies/privilegies.module";
+import { PrivilegesModule } from "./privileges/privileges.module";
 import { ResponsesService } from "./responses/responses.service";
+import { AuthorizationsModule } from "./authorizations/authorizations.module";
 
 @Module({
    imports: [
@@ -26,8 +25,8 @@ import { ResponsesService } from "./responses/responses.service";
       MssqlModule,
       CompaniesModule,
       ModulesModule,
-      OperatorsModule,
-      PrivilegiesModule,
+      PrivilegesModule,
+      AuthorizationsModule,
    ],
    providers: [
       ResponsesService,
@@ -42,8 +41,7 @@ export class AppModule implements NestModule {
       consumer
          .apply(GlobalMiddleware)
          .forRoutes(
-            OperatorsController,
-            PrivilegiesController,
+            PrivilegesController,
             CompaniesController,
             ModulesController,
          );

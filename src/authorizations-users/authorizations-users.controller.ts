@@ -12,7 +12,7 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 export class AuthorizationsUsersController {
    constructor(private srvAuthoUser: AuthorizationsUsersService) {}
 
-   @Post()
+   @Post("send-email")
    @ApiModelResponse("boolean")
    async createUser(
       @Body() pBody: CreateAuthorizacionUserReqDto,

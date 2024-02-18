@@ -23,14 +23,14 @@ export class GlobalMiddleware implements NestMiddleware {
       const bearer = autorizacion.split(" ")[1];
       const parameters: ProcedureParameter[] = [
          {
-            variableName: "piAuthorizationsId",
+            variableName: "piTokenId",
             typeVariable: UniqueIdentifier,
             value: bearer,
          },
       ];
 
       const result = await this.srvMSSQL.executeProcedure(
-         "spGetAuthorizations",
+         "spGetToken",
          parameters,
       );
 

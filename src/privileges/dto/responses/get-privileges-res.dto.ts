@@ -1,4 +1,4 @@
-export class GetPrivilegiesResDto {
+export class GetPrivilegesResDto {
    PrivilegeId: string;
    Name: string;
    Abbreviation: string;

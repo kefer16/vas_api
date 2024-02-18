@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { MSSQLService } from "src/mssql/mssql.service";
-import { GetPrivilegiesResDto } from "./dto/responses/get-privilegies-res.dto";
+import { GetPrivilegesResDto } from "./dto/responses/get-privileges-res.dto";
 
 @Injectable()
-export class PrivilegiesService {
+export class PrivilegesService {
    constructor(private mssql: MSSQLService) {}
-   async getPrivilegies(): Promise<GetPrivilegiesResDto[]> {
-      const result = await this.mssql.executeProcedureList("spGetPrivilegies");
+   async getPrivileges(): Promise<GetPrivilegesResDto[]> {
+      const result = await this.mssql.executeProcedureList("spGetPrivileges");
 
-      const resultMapper: GetPrivilegiesResDto[] = result.map(
+      const resultMapper: GetPrivilegesResDto[] = result.map(
          (item) =>
             ({
                PrivilegeId: item.PrivilegeId ?? "",
@@ -16,7 +16,7 @@ export class PrivilegiesService {
                Abbreviation: item.Abbreviation ?? "",
                CreationDate: item.CreationDate ?? new Date(),
                IsActive: item.IsActive ?? false,
-            }) as GetPrivilegiesResDto,
+            }) as GetPrivilegesResDto,
       );
 
       return resultMapper;
