@@ -42,6 +42,7 @@ export class UsersService {
       pPassword: string,
       pEmail: string,
       pCreationDate: Date,
+      pIsTransacction?: boolean,
    ): Promise<boolean> {
       pPassword = await encrypt(pPassword);
 
@@ -71,6 +72,7 @@ export class UsersService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateUser",
          parameters,
+         pIsTransacction,
       );
    }
 

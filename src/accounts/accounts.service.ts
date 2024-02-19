@@ -8,10 +8,12 @@ import { EmailsService } from "src/emails/emails.service";
 import { LoginAccountReqDto } from "./dto/requests/login-account-req.dto";
 import { comparePassword } from "src/utils/bcrypt.util";
 import { LoginAccountResDto } from "./dto/responses/login-account-res.dto";
+import { MSSQLService } from "src/mssql/mssql.service";
 
 @Injectable()
 export class AccountsService {
    constructor(
+      private srvMSSQL: MSSQLService,
       private srvAuth: AuthorizationsService,
       private srvUser: UsersService,
       private srvEmail: EmailsService,
@@ -37,37 +39,28 @@ export class AccountsService {
             HttpStatus.BAD_REQUEST,
          );
       }
-      const isCreateUser = await this.srvUser.createUser(
-         pBody.UserName,
-         pBody.Password,
-         pBody.Email,
-         pBody.CreationDate,
-      );
-
-      if (!isCreateUser) {
-         throw new HttpException(
-            "[VAL]Hubo un error al crear la cuenta",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
       const TOKEN = String(generateNumberRandom());
 
-      const isCreateAuthorization = await this.srvAuth.createAthorization(
-         pBody.Email,
-         TOKEN,
-         pBody.CreationDate,
+      return this.srvMSSQL.executeTransacctionIsSuccess(
+         "[VAL]Hubo un error al crear la cuenta",
+         async () => {
+            await this.srvUser.createUser(
+               pBody.UserName,
+               pBody.Password,
+               pBody.Email,
+               pBody.CreationDate,
+               true,
+            );
+
+            await this.srvAuth.createAthorization(
+               pBody.Email,
+               TOKEN,
+               pBody.CreationDate,
+               true,
+            );
+            return true;
+         },
       );
-
-      if (!isCreateAuthorization) {
-         throw new HttpException(
-            "[VAL]Hubo un error al crear la cuenta",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
-
-      // await this.srvEmail.sendEmailAuthorization(pBody.Email, TOKEN);
-
-      return true;
    }
 
    async activateAccount(pBody: ActiveAccountReqDto): Promise<boolean> {

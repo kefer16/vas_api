@@ -44,6 +44,7 @@ export class AuthorizationsService {
       pEmail: string,
       pToken: string,
       pCreationDate: Date,
+      pIsTransacction?: boolean,
    ): Promise<boolean> {
       const parameters: ProcedureParameter[] = [
          {
@@ -66,6 +67,7 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateAuthorization",
          parameters,
+         pIsTransacction,
       );
    }
 
