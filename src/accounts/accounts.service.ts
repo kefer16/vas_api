@@ -98,6 +98,13 @@ export class AccountsService {
    }
 
    async loginAccount(pBody: LoginAccountReqDto): Promise<LoginAccountResDto> {
+      const getPassword = await this.srvUser.getPassword(pBody.UserName);
+      if (!getPassword.Password) {
+         throw new HttpException(
+            "[VAL]Usuario o contraseña incorrecta",
+            HttpStatus.BAD_REQUEST,
+         );
+      }
       const countActiveAuthorization =
          await this.srvAuth.countActiveAuthorization(pBody.UserName);
 
@@ -111,14 +118,6 @@ export class AccountsService {
       if (countActiveAuthorization > 1) {
          throw new HttpException(
             "[VAL]Ocurrió un error al Iniciar Sesión",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
-
-      const getPassword = await this.srvUser.getPassword(pBody.UserName);
-      if (!getPassword.Password) {
-         throw new HttpException(
-            "[VAL]Usuario o contraseña incorrecta",
             HttpStatus.BAD_REQUEST,
          );
       }
