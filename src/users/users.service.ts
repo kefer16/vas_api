@@ -87,7 +87,8 @@ export class UsersService {
          "spGetPasswordUser",
          parameters,
       );
-      const resultMapper: GetPasswordUserDto = JSON.parse(result);
+      const resultMapper: GetPasswordUserDto =
+         result === null ? ({} as GetPasswordUserDto) : JSON.parse(result);
       return resultMapper;
    }
 
@@ -104,7 +105,8 @@ export class UsersService {
          "spGetUser",
          parameters,
       );
-      const resultMapper: LoginAccountResDto = JSON.parse(result);
+      const resultMapper: LoginAccountResDto =
+         result === null ? ({} as LoginAccountResDto) : JSON.parse(result);
       return resultMapper;
    }
 }
