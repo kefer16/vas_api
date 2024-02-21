@@ -1,5 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { ConnectionPool, ISqlType, Transaction } from "mssql";
+import {
+   HttpException,
+   HttpStatus,
+   Injectable,
+   OnModuleDestroy,
+} from "@nestjs/common";
+import { ConnectionPool, ISqlType, Request, Transaction } from "mssql";
 
 export interface ProcedureParameter {
    variableName: string;
@@ -8,14 +13,10 @@ export interface ProcedureParameter {
 }
 
 @Injectable()
-export class MSSQLService {
+export class MSSQLService implements OnModuleDestroy {
    private pool: ConnectionPool;
 
-   constructor() {
-      this.connect();
-   }
-
-   private async connect() {
+   private async createConnection() {
       try {
          this.pool = await new ConnectionPool({
             user: process.env.DB_USER ?? "",
@@ -34,12 +35,24 @@ export class MSSQLService {
       }
    }
 
+   async getConnection() {
+      if (!this.pool) {
+         await this.createConnection();
+      }
+      return this.pool;
+   }
+
+   async onModuleDestroy() {
+      console.log("cierra conexion");
+
+      await this.pool.close();
+   }
+
    async executeProcedure(
       nameProcedure: string,
       parameters: ProcedureParameter[] = [],
    ): Promise<any> {
       try {
-         await this.connect();
          const request = this.pool.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
@@ -60,7 +73,6 @@ export class MSSQLService {
       parameters: ProcedureParameter[] = [],
    ): Promise<any> {
       try {
-         await this.connect();
          const request = this.pool.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
@@ -78,11 +90,13 @@ export class MSSQLService {
    async executeProcedureIsSuccess(
       nameProcedure: string,
       parameters: ProcedureParameter[],
-      pIsTransacction?: boolean,
+      pTransacction?: Transaction,
    ): Promise<boolean> {
       try {
-         const request = this.pool.request();
-         console.log(request.parameters);
+         const request = pTransacction
+            ? new Request(pTransacction)
+            : new Request();
+
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
@@ -90,7 +104,7 @@ export class MSSQLService {
 
          return true;
       } catch (error) {
-         if (pIsTransacction) {
+         if (pTransacction) {
             throw error;
          } else {
             throw new HttpException(
@@ -103,26 +117,27 @@ export class MSSQLService {
 
    async executeTransacctionIsSuccess(
       pMessageValidation: string,
-      pOperations: () => Promise<boolean>,
+      pOperations: (pTransacction: Transaction) => Promise<boolean>,
    ): Promise<boolean> {
-      await this.connect();
-      const transaction = new Transaction(this.pool);
+      const connection = await this.getConnection();
+      const transaction = new Transaction(connection);
       try {
          await transaction.begin();
-         await pOperations();
-         console.log("antes del commit");
-
+         await pOperations(transaction);
          await transaction.commit();
-         console.log("despues del commit");
          return true;
       } catch (error) {
+         console.log("entra a rollback");
+
          await transaction.rollback();
+         console.log(error.message);
+
          throw new HttpException(
             pMessageValidation,
             HttpStatus.INTERNAL_SERVER_ERROR,
          );
       } finally {
-         await this.pool.close();
+         // await this.pool.close();
       }
    }
 
@@ -131,7 +146,7 @@ export class MSSQLService {
       parameters: ProcedureParameter[],
    ): Promise<number> {
       try {
-         await this.connect();
+         // await this.connect();
          const request = this.pool.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
@@ -151,7 +166,6 @@ export class MSSQLService {
       parameters: ProcedureParameter[],
    ): Promise<string> {
       try {
-         await this.connect();
          const request = this.pool.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);

@@ -11,8 +11,9 @@ import { ValidGlobalResDto } from "./dto/responses/valid-global-res.dto";
 
 @Injectable()
 export class GlobalMiddleware implements NestMiddleware {
-   constructor(private srvMSSQL: MSSQLService) {}
+   constructor(private readonly srvMSSQL: MSSQLService) {}
    async use(req: Request, res: Response, next: NextFunction) {
+      await this.srvMSSQL.getConnection();
       const autorizacion = req.headers.authorization;
       if (autorizacion?.split(" ")[0] !== "Bearer") {
          throw new HttpException(

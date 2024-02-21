@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
-import { DateTime, VarChar } from "mssql";
+import { DateTime, Transaction, VarChar } from "mssql";
 import { encrypt } from "src/utils/bcrypt.util";
 import { GetPasswordUserDto } from "./dto/requests/get-password-user.dto";
 import { LoginAccountResDto } from "src/accounts/dto/responses/login-account-res.dto";
@@ -42,7 +42,7 @@ export class UsersService {
       pPassword: string,
       pEmail: string,
       pCreationDate: Date,
-      pIsTransacction?: boolean,
+      pTransacction?: Transaction,
    ): Promise<boolean> {
       pPassword = await encrypt(pPassword);
 
@@ -72,7 +72,7 @@ export class UsersService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateUser",
          parameters,
-         pIsTransacction,
+         pTransacction,
       );
    }
 

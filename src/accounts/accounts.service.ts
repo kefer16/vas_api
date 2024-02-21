@@ -43,20 +43,20 @@ export class AccountsService {
 
       return this.srvMSSQL.executeTransacctionIsSuccess(
          "[VAL]Hubo un error al crear la cuenta",
-         async () => {
+         async (pTransacction) => {
             await this.srvUser.createUser(
                pBody.UserName,
                pBody.Password,
                pBody.Email,
                pBody.CreationDate,
-               true,
+               pTransacction,
             );
 
             await this.srvAuth.createAthorization(
                pBody.Email,
                TOKEN,
                pBody.CreationDate,
-               true,
+               pTransacction,
             );
             return true;
          },

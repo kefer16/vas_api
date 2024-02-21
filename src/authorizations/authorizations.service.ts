@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DateTime, VarChar } from "mssql";
+import { DateTime, Transaction, VarChar } from "mssql";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 
 @Injectable()
@@ -44,7 +44,7 @@ export class AuthorizationsService {
       pEmail: string,
       pToken: string,
       pCreationDate: Date,
-      pIsTransacction?: boolean,
+      pTransacction?: Transaction,
    ): Promise<boolean> {
       const parameters: ProcedureParameter[] = [
          {
@@ -67,7 +67,7 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateAuthorization",
          parameters,
-         pIsTransacction,
+         pTransacction,
       );
    }
 
