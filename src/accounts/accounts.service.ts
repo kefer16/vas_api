@@ -41,29 +41,41 @@ export class AccountsService {
          }
          const TOKEN = String(generateNumberRandom());
 
-         return this.srvMSSQL.executeTransacctionIsSuccess(
-            "[VAL]Hubo un error al crear la cuenta",
-            connection,
-            async (pTransacction) => {
-               await this.srvUser.createUser(
-                  pBody.UserName,
-                  pBody.Password,
-                  pBody.Email,
-                  pBody.CreationDate,
-                  connection,
-                  pTransacction,
-               );
+         const transacction =
+            await this.srvMSSQL.createTransacction(connection);
 
-               await this.srvAuth.createAthorization(
-                  pBody.Email,
-                  TOKEN,
-                  pBody.CreationDate,
-                  connection,
-                  pTransacction,
-               );
-               return true;
-            },
-         );
+         try {
+            await this.srvMSSQL.beginTransacction(transacction);
+
+            const createUser = await this.srvUser.createUser(
+               pBody.UserName,
+               pBody.Password,
+               pBody.Email,
+               pBody.CreationDate,
+               connection,
+               transacction,
+            );
+
+            if (!createUser) {
+               throw new Error("[VAL]Error al crear la cuenta");
+            }
+
+            const createAthorization = await this.srvAuth.createAthorization(
+               pBody.Email,
+               TOKEN,
+               pBody.CreationDate,
+               connection,
+               transacction,
+            );
+            if (!createAthorization) {
+               throw new Error("[VAL]Error al crear la cuenta");
+            }
+            await this.srvMSSQL.commitTransacction(transacction);
+         } catch (error) {
+            await this.srvMSSQL.rollbackTransacction(transacction);
+            throw error;
+         }
+         return true;
       } catch (error) {
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {

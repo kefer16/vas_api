@@ -109,29 +109,51 @@ export class MSSQLService {
       }
    }
 
-   async executeTransacctionIsSuccess(
-      pMessageValidation: string,
-      pConnection: ConnectionPool,
-      pOperations: (pTransacction: Transaction) => Promise<boolean>,
-   ): Promise<boolean> {
+   async createTransacction(pConnection): Promise<Transaction> {
+      // await this.connect();
       const transaction = new Transaction(pConnection);
-      try {
-         await transaction.begin();
-         await pOperations(transaction);
-         await transaction.commit();
-         return true;
-      } catch (error) {
-         await transaction.rollback();
-         pConnection.close();
-
-         throw new HttpException(
-            pMessageValidation,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-         );
-      } finally {
-         // await this.pool.close();
-      }
+      return transaction;
    }
+
+   async beginTransacction(pTransacction: Transaction) {
+      await pTransacction.begin();
+   }
+
+   async commitTransacction(pTransacction: Transaction) {
+      await pTransacction.commit();
+   }
+
+   async rollbackTransacction(pTransacction: Transaction) {
+      await pTransacction.rollback();
+   }
+
+   // async executeTransacctionIsSuccess(
+   //    pMessageValidation: string,
+   //    pConnection: ConnectionPool,
+   //    pOperations: (
+   //       pTransacction: Transaction,
+   //       pConnection: ConnectionPool,
+   //    ) => Promise<boolean>,
+   // ): Promise<boolean> {
+   //    const transaction = new Transaction(pConnection);
+   //    try {
+   //       console.log("pasa");
+   //       await transaction.begin();
+   //       console.log("pasa begin");
+   //       await pOperations(transaction, pConnection);
+
+   //       return true;
+   //    } catch (error) {
+   //       await transaction.rollback();
+
+   //       throw new HttpException(
+   //          pMessageValidation,
+   //          HttpStatus.INTERNAL_SERVER_ERROR,
+   //       );
+   //    } finally {
+   //       // await this.pool.close();
+   //    }
+   // }
 
    async executeProcedureCount(
       nameProcedure: string,
