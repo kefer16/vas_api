@@ -4,9 +4,14 @@ import { GetPrivilegesResDto } from "./dto/responses/get-privileges-res.dto";
 
 @Injectable()
 export class PrivilegesService {
-   constructor(private mssql: MSSQLService) {}
+   constructor(private srvMSSQL: MSSQLService) {}
    async getPrivileges(): Promise<GetPrivilegesResDto[]> {
-      const result = await this.mssql.executeProcedureList("spGetPrivileges");
+      const connection = await this.srvMSSQL.createConnection();
+      const result = await this.srvMSSQL.executeProcedureList(
+         "spGetPrivileges",
+         [],
+         connection,
+      );
 
       const resultMapper: GetPrivilegesResDto[] = result.map(
          (item) =>

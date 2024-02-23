@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { DateTime, Transaction, VarChar } from "mssql";
+import { ConnectionPool, DateTime, Transaction, VarChar } from "mssql";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 
 @Injectable()
 export class AuthorizationsService {
    constructor(private srvMSSQL: MSSQLService) {}
-   async countAuthorization(pEmail: string, pCode: string): Promise<number> {
+   async countAuthorization(
+      pEmail: string,
+      pCode: string,
+      pConnection: ConnectionPool,
+   ): Promise<number> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piEmail",
@@ -22,10 +26,14 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureCount(
          "spCountAuthorization",
          parameters,
+         pConnection,
       );
    }
 
-   async countActiveAuthorization(pUserName: string): Promise<number> {
+   async countActiveAuthorization(
+      pUserName: string,
+      pConnection: ConnectionPool,
+   ): Promise<number> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piUsername",
@@ -37,6 +45,7 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureCount(
          "spCountActiveAuthorization",
          parameters,
+         pConnection,
       );
    }
 
@@ -44,6 +53,7 @@ export class AuthorizationsService {
       pEmail: string,
       pToken: string,
       pCreationDate: Date,
+      pConnection: ConnectionPool,
       pTransacction?: Transaction,
    ): Promise<boolean> {
       const parameters: ProcedureParameter[] = [
@@ -67,11 +77,16 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateAuthorization",
          parameters,
+         pConnection,
          pTransacction,
       );
    }
 
-   async updateAuthorization(pEmail: string, pCode: string): Promise<boolean> {
+   async updateAuthorization(
+      pEmail: string,
+      pCode: string,
+      pConnection: ConnectionPool,
+   ): Promise<boolean> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piEmail",
@@ -88,6 +103,7 @@ export class AuthorizationsService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spUpdateAuthorization",
          parameters,
+         pConnection,
       );
    }
 }

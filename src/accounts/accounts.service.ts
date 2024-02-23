@@ -20,8 +20,10 @@ export class AccountsService {
    ) {}
 
    async createAccount(pBody: CreateAccountReqDto): Promise<boolean> {
+      const connection = await this.srvMSSQL.createConnection();
       const countRepeatUserName = await this.srvUser.countUserNameRepeat(
          pBody.UserName,
+         connection,
       );
 
       if (countRepeatUserName > 0) {
@@ -31,7 +33,10 @@ export class AccountsService {
          );
       }
 
-      const countRepeatEmail = await this.srvUser.countEmailRepeat(pBody.Email);
+      const countRepeatEmail = await this.srvUser.countEmailRepeat(
+         pBody.Email,
+         connection,
+      );
 
       if (countRepeatEmail > 0) {
          throw new HttpException(
@@ -43,12 +48,14 @@ export class AccountsService {
 
       return this.srvMSSQL.executeTransacctionIsSuccess(
          "[VAL]Hubo un error al crear la cuenta",
+         connection,
          async (pTransacction) => {
             await this.srvUser.createUser(
                pBody.UserName,
                pBody.Password,
                pBody.Email,
                pBody.CreationDate,
+               connection,
                pTransacction,
             );
 
@@ -56,6 +63,7 @@ export class AccountsService {
                pBody.Email,
                TOKEN,
                pBody.CreationDate,
+               connection,
                pTransacction,
             );
             return true;
@@ -64,9 +72,11 @@ export class AccountsService {
    }
 
    async activateAccount(pBody: ActiveAccountReqDto): Promise<boolean> {
+      const connection = await this.srvMSSQL.createConnection();
       const countAuthorizationUser = await this.srvAuth.countAuthorization(
          pBody.Email,
          pBody.CodeConfirmation,
+         connection,
       );
 
       if (countAuthorizationUser <= 0) {
@@ -79,6 +89,7 @@ export class AccountsService {
          await this.srvAuth.updateAuthorization(
             pBody.Email,
             pBody.CodeConfirmation,
+            connection,
          );
       if (!isSuccessUpdateAuthorization) {
          throw new HttpException(
@@ -91,37 +102,40 @@ export class AccountsService {
    }
 
    async loginAccount(pBody: LoginAccountReqDto): Promise<LoginAccountResDto> {
-      const getPassword = await this.srvUser.getPassword(pBody.UserName);
-      if (!getPassword.Password) {
-         throw new HttpException(
-            "[VAL]Usuario o contraseña incorrecta",
-            HttpStatus.BAD_REQUEST,
+      const connection = await this.srvMSSQL.createConnection();
+      try {
+         const getPassword = await this.srvUser.getPassword(
+            pBody.UserName,
+            connection,
          );
-      }
-      const countActiveAuthorization =
-         await this.srvAuth.countActiveAuthorization(pBody.UserName);
+         if (!getPassword.Password) {
+            throw new Error("[VAL]Usuario o contraseña incorrecta");
+         }
+         const countActiveAuthorization =
+            await this.srvAuth.countActiveAuthorization(
+               pBody.UserName,
+               connection,
+            );
 
-      if (countActiveAuthorization <= 0) {
-         throw new HttpException(
-            "[VAL]Por favor, activa tu cuenta",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
+         if (countActiveAuthorization <= 0) {
+            throw new Error("[VAL]Por favor, activa tu cuenta");
+         }
 
-      if (countActiveAuthorization > 1) {
-         throw new HttpException(
-            "[VAL]Ocurrió un error al Iniciar Sesión",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
+         if (countActiveAuthorization > 1) {
+            throw new Error("[VAL]Ocurrió un error al Iniciar Sesión");
+         }
 
-      if (!(await comparePassword(pBody.Password, getPassword.Password))) {
-         throw new HttpException(
-            "[VAL]Usuario o contraseña incorrecta",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
+         if (!(await comparePassword(pBody.Password, getPassword.Password))) {
+            throw new Error("[VAL]Usuario o contraseña incorrecta");
+         }
 
-      return await this.srvUser.getUser(pBody.UserName);
+         const getUser = await this.srvUser.getUser(pBody.UserName, connection);
+
+         return getUser;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 }

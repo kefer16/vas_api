@@ -10,7 +10,12 @@ export class ModulesService {
    constructor(private srvMSSQL: MSSQLService) {}
 
    async getModules(): Promise<ModuleResDto[]> {
-      const result = await this.srvMSSQL.executeProcedure("spGetModules");
+      const connection = await this.srvMSSQL.createConnection();
+      const result = await this.srvMSSQL.executeProcedure(
+         "spGetModules",
+         [],
+         connection,
+      );
 
       const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
 
@@ -18,6 +23,7 @@ export class ModulesService {
    }
 
    async getModule(pId: string): Promise<ModuleResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piModuleId",
@@ -28,6 +34,7 @@ export class ModulesService {
       const result = await this.srvMSSQL.executeProcedure(
          "spGetModule",
          parameters,
+         connection,
       );
 
       const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
@@ -36,6 +43,7 @@ export class ModulesService {
    }
 
    async createModule(pBody: CreateModuleReqDto): Promise<ModuleResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piName",
@@ -67,6 +75,7 @@ export class ModulesService {
       const result = await this.srvMSSQL.executeProcedure(
          "spCreateModule",
          parameters,
+         connection,
       );
 
       const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
@@ -78,6 +87,7 @@ export class ModulesService {
       pId: string,
       pBody: UpdateModuleReqDto,
    ): Promise<ModuleResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piModuleId",
@@ -109,6 +119,7 @@ export class ModulesService {
       const result = await this.srvMSSQL.executeProcedure(
          "spUpdateModule",
          parameters,
+         connection,
       );
 
       const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
@@ -117,6 +128,7 @@ export class ModulesService {
    }
 
    async deleteModule(pId: string): Promise<boolean> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piModuleId",
@@ -128,6 +140,7 @@ export class ModulesService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spDeleteModule",
          parameters,
+         connection,
       );
    }
 }

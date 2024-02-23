@@ -1,9 +1,4 @@
-import {
-   HttpException,
-   HttpStatus,
-   Injectable,
-   OnModuleDestroy,
-} from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConnectionPool, ISqlType, Request, Transaction } from "mssql";
 
 export interface ProcedureParameter {
@@ -13,12 +8,12 @@ export interface ProcedureParameter {
 }
 
 @Injectable()
-export class MSSQLService implements OnModuleDestroy {
-   private pool: ConnectionPool;
+export class MSSQLService {
+   // private pool: ConnectionPool;
 
-   private async createConnection() {
+   async createConnection() {
       try {
-         this.pool = await new ConnectionPool({
+         const connection = await new ConnectionPool({
             user: process.env.DB_USER ?? "",
             password: process.env.DB_PASSWORD ?? "",
             server: process.env.DB_SERVER ?? "",
@@ -30,30 +25,24 @@ export class MSSQLService implements OnModuleDestroy {
             },
          }).connect();
          console.log("Conexión a MSSQL establecida");
+         return connection;
       } catch (error) {
          console.error("Error al conectar a MSSQL:", error.message);
       }
    }
 
-   async getConnection() {
-      if (!this.pool) {
-         await this.createConnection();
-      }
-      return this.pool;
-   }
-
-   async onModuleDestroy() {
-      console.log("cierra conexion");
-
-      await this.pool.close();
+   async close(pConnection: ConnectionPool) {
+      await pConnection.close();
+      console.log("Conexión a MSSQL cerrada");
    }
 
    async executeProcedure(
       nameProcedure: string,
       parameters: ProcedureParameter[] = [],
+      pConnection: ConnectionPool,
    ): Promise<any> {
       try {
-         const request = this.pool.request();
+         const request = pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
@@ -61,6 +50,7 @@ export class MSSQLService implements OnModuleDestroy {
 
          return result.recordset[0];
       } catch (error) {
+         pConnection.close();
          throw new HttpException(
             `Error al ejecutar la consulta: ${error.message}`,
             HttpStatus.INTERNAL_SERVER_ERROR,
@@ -71,15 +61,17 @@ export class MSSQLService implements OnModuleDestroy {
    async executeProcedureList(
       nameProcedure: string,
       parameters: ProcedureParameter[] = [],
+      pConnection: ConnectionPool,
    ): Promise<any> {
       try {
-         const request = this.pool.request();
+         const request = pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
          const result = await request.execute(nameProcedure);
          return result.recordset;
       } catch (error) {
+         pConnection.close();
          throw new HttpException(
             `Error al ejecutar la consulta: ${error.message}`,
             HttpStatus.INTERNAL_SERVER_ERROR,
@@ -90,12 +82,13 @@ export class MSSQLService implements OnModuleDestroy {
    async executeProcedureIsSuccess(
       nameProcedure: string,
       parameters: ProcedureParameter[],
+      pConnection: ConnectionPool,
       pTransacction?: Transaction,
    ): Promise<boolean> {
       try {
          const request = pTransacction
             ? new Request(pTransacction)
-            : new Request();
+            : pConnection.request();
 
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
@@ -107,6 +100,7 @@ export class MSSQLService implements OnModuleDestroy {
          if (pTransacction) {
             throw error;
          } else {
+            pConnection.close();
             throw new HttpException(
                `Error al ejecutar la consulta: ${error.message}`,
                HttpStatus.INTERNAL_SERVER_ERROR,
@@ -117,20 +111,18 @@ export class MSSQLService implements OnModuleDestroy {
 
    async executeTransacctionIsSuccess(
       pMessageValidation: string,
+      pConnection: ConnectionPool,
       pOperations: (pTransacction: Transaction) => Promise<boolean>,
    ): Promise<boolean> {
-      const connection = await this.getConnection();
-      const transaction = new Transaction(connection);
+      const transaction = new Transaction(pConnection);
       try {
          await transaction.begin();
          await pOperations(transaction);
          await transaction.commit();
          return true;
       } catch (error) {
-         console.log("entra a rollback");
-
          await transaction.rollback();
-         console.log(error.message);
+         pConnection.close();
 
          throw new HttpException(
             pMessageValidation,
@@ -144,16 +136,17 @@ export class MSSQLService implements OnModuleDestroy {
    async executeProcedureCount(
       nameProcedure: string,
       parameters: ProcedureParameter[],
+      pConnection: ConnectionPool,
    ): Promise<number> {
       try {
-         // await this.connect();
-         const request = this.pool.request();
+         const request = pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
          const result = await request.execute(nameProcedure);
          return result.recordset[0].COUNT;
       } catch (error) {
+         pConnection.close();
          throw new HttpException(
             `Error al ejecutar la consulta: ${error.message}`,
             HttpStatus.INTERNAL_SERVER_ERROR,
@@ -164,15 +157,17 @@ export class MSSQLService implements OnModuleDestroy {
    async executeProcedureJSON(
       nameProcedure: string,
       parameters: ProcedureParameter[],
+      pConnection: ConnectionPool,
    ): Promise<string> {
       try {
-         const request = this.pool.request();
+         const request = pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
          const result = await request.execute(nameProcedure);
          return result.recordset[0].JSON;
       } catch (error) {
+         pConnection.close();
          throw new HttpException(
             `Error al ejecutar la consulta: ${error.message}`,
             HttpStatus.INTERNAL_SERVER_ERROR,

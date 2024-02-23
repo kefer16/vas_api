@@ -10,10 +10,15 @@ import { Bit, DateTime, UniqueIdentifier, VarChar } from "mssql";
 
 @Injectable()
 export class CompaniesService {
-   constructor(private mssql: MSSQLService) {}
+   constructor(private srvMSSQL: MSSQLService) {}
 
    async getCompanies(): Promise<GetCompaniesResDto[]> {
-      const result = await this.mssql.executeProcedureList("spGetCompanies");
+      const connection = await this.srvMSSQL.createConnection();
+      const result = await this.srvMSSQL.executeProcedureList(
+         "spGetCompanies",
+         [],
+         connection,
+      );
 
       const resultMapper: GetCompaniesResDto[] = result.map(
          (item) =>
@@ -30,6 +35,7 @@ export class CompaniesService {
    }
 
    async getCompany(pId: string): Promise<GetCompanyResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piCompanyIda",
@@ -37,9 +43,10 @@ export class CompaniesService {
             value: pId,
          },
       ];
-      const result = await this.mssql.executeProcedure(
+      const result = await this.srvMSSQL.executeProcedure(
          "spGetCompany",
          parameters,
+         connection,
       );
 
       const resultMapper: UpdateCompanyResDto = {
@@ -56,6 +63,7 @@ export class CompaniesService {
    async createCompany(
       pBody: CreateCompanyReqDto,
    ): Promise<CreateCompanyResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piName",
@@ -79,9 +87,10 @@ export class CompaniesService {
          },
       ];
 
-      const result = await this.mssql.executeProcedure(
+      const result = await this.srvMSSQL.executeProcedure(
          "spCreateCompany",
          parameters,
+         connection,
       );
 
       const resultMapper: CreateCompanyResDto = {
@@ -99,6 +108,7 @@ export class CompaniesService {
       pId: string,
       pBody: UpdateCompanyReqDto,
    ): Promise<UpdateCompanyResDto> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piCompanyId",
@@ -122,9 +132,10 @@ export class CompaniesService {
          },
       ];
 
-      const result = await this.mssql.executeProcedure(
+      const result = await this.srvMSSQL.executeProcedure(
          "spUpdateCompany",
          parameters,
+         connection,
       );
 
       const resultMapper: UpdateCompanyResDto = {
@@ -139,6 +150,7 @@ export class CompaniesService {
    }
 
    async deleteCompany(pId: string): Promise<boolean> {
+      const connection = await this.srvMSSQL.createConnection();
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piCompanyId",
@@ -147,9 +159,10 @@ export class CompaniesService {
          },
       ];
 
-      return await this.mssql.executeProcedureIsSuccess(
+      return await this.srvMSSQL.executeProcedureIsSuccess(
          "spDeleteCompany",
          parameters,
+         connection,
       );
    }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
-import { DateTime, Transaction, VarChar } from "mssql";
+import { ConnectionPool, DateTime, Transaction, VarChar } from "mssql";
 import { encrypt } from "src/utils/bcrypt.util";
 import { GetPasswordUserDto } from "./dto/requests/get-password-user.dto";
 import { LoginAccountResDto } from "src/accounts/dto/responses/login-account-res.dto";
@@ -8,7 +8,10 @@ import { LoginAccountResDto } from "src/accounts/dto/responses/login-account-res
 export class UsersService {
    constructor(private srvMSSQL: MSSQLService) {}
 
-   async countUserNameRepeat(pUserName: string): Promise<number> {
+   async countUserNameRepeat(
+      pUserName: string,
+      pConnection: ConnectionPool,
+   ): Promise<number> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piUserName",
@@ -20,9 +23,13 @@ export class UsersService {
       return await this.srvMSSQL.executeProcedureCount(
          "spFindRepeatUserName",
          parameters,
+         pConnection,
       );
    }
-   async countEmailRepeat(pEmail: string): Promise<number> {
+   async countEmailRepeat(
+      pEmail: string,
+      pConnection: ConnectionPool,
+   ): Promise<number> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piEmail",
@@ -34,6 +41,7 @@ export class UsersService {
       return await this.srvMSSQL.executeProcedureCount(
          "spFindRepeatEmail",
          parameters,
+         pConnection,
       );
    }
 
@@ -42,6 +50,7 @@ export class UsersService {
       pPassword: string,
       pEmail: string,
       pCreationDate: Date,
+      pConnection: ConnectionPool,
       pTransacction?: Transaction,
    ): Promise<boolean> {
       pPassword = await encrypt(pPassword);
@@ -72,11 +81,15 @@ export class UsersService {
       return await this.srvMSSQL.executeProcedureIsSuccess(
          "spCreateUser",
          parameters,
+         pConnection,
          pTransacction,
       );
    }
 
-   async getPassword(pUserName: string): Promise<GetPasswordUserDto> {
+   async getPassword(
+      pUserName: string,
+      pConnection: ConnectionPool,
+   ): Promise<GetPasswordUserDto> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piUserName",
@@ -88,13 +101,17 @@ export class UsersService {
       const result = await this.srvMSSQL.executeProcedureJSON(
          "spGetPasswordUser",
          parameters,
+         pConnection,
       );
       const resultMapper: GetPasswordUserDto =
          result === null ? ({} as GetPasswordUserDto) : JSON.parse(result);
       return resultMapper;
    }
 
-   async getUser(pUserName: string): Promise<LoginAccountResDto> {
+   async getUser(
+      pUserName: string,
+      pConnection: ConnectionPool,
+   ): Promise<LoginAccountResDto> {
       const parameters: ProcedureParameter[] = [
          {
             variableName: "piUserName",
@@ -106,6 +123,7 @@ export class UsersService {
       const result = await this.srvMSSQL.executeProcedureJSON(
          "spGetUser",
          parameters,
+         pConnection,
       );
       const resultMapper: LoginAccountResDto =
          result === null ? ({} as LoginAccountResDto) : JSON.parse(result);

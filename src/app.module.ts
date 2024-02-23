@@ -16,6 +16,7 @@ import { AuthorizationsModule } from "./authorizations/authorizations.module";
 import { EmailsModule } from "./emails/emails.module";
 import { AccountsModule } from "./accounts/accounts.module";
 import { AccountsController } from "./accounts/accounts.controller";
+import { TokensModule } from './tokens/tokens.module';
 
 @Module({
    imports: [
@@ -30,6 +31,7 @@ import { AccountsController } from "./accounts/accounts.controller";
       PrivilegesModule,
       AuthorizationsModule,
       EmailsModule,
+      TokensModule,
    ],
    providers: [
       ResponsesService,

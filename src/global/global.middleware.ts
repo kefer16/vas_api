@@ -1,51 +1,12 @@
-import {
-   HttpException,
-   HttpStatus,
-   Injectable,
-   NestMiddleware,
-} from "@nestjs/common";
+import { Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
-import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
-import { UniqueIdentifier } from "mssql";
-import { ValidGlobalResDto } from "./dto/responses/valid-global-res.dto";
+import { TokensService } from "src/tokens/tokens.service";
 
 @Injectable()
 export class GlobalMiddleware implements NestMiddleware {
-   constructor(private readonly srvMSSQL: MSSQLService) {}
+   constructor(private srvToken: TokensService) {}
    async use(req: Request, res: Response, next: NextFunction) {
-      await this.srvMSSQL.getConnection();
-      const autorizacion = req.headers.authorization;
-      if (autorizacion?.split(" ")[0] !== "Bearer") {
-         throw new HttpException(
-            "[VAL]Ingrese Bearer Authentication",
-            HttpStatus.UNAUTHORIZED,
-         );
-      }
-      const bearer = autorizacion.split(" ")[1];
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piTokenId",
-            typeVariable: UniqueIdentifier,
-            value: bearer,
-         },
-      ];
-
-      const result = await this.srvMSSQL.executeProcedure(
-         "spGetToken",
-         parameters,
-      );
-
-      const resultMapper: ValidGlobalResDto = {
-         Message: result.Message ?? "",
-         IsActive: result.IsActive ?? false,
-      };
-
-      if (!resultMapper.IsActive) {
-         throw new HttpException(
-            `[VAL]${resultMapper.Message}`,
-            HttpStatus.UNAUTHORIZED,
-         );
-      }
+      await this.srvToken.validateTokenAutorizathion(req);
 
       next();
    }
