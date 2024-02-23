@@ -21,84 +21,86 @@ export class AccountsService {
 
    async createAccount(pBody: CreateAccountReqDto): Promise<boolean> {
       const connection = await this.srvMSSQL.createConnection();
-      const countRepeatUserName = await this.srvUser.countUserNameRepeat(
-         pBody.UserName,
-         connection,
-      );
-
-      if (countRepeatUserName > 0) {
-         throw new HttpException(
-            "[VAL]El nombre de usuario ya existe",
-            HttpStatus.BAD_REQUEST,
+      try {
+         const countRepeatUserName = await this.srvUser.countUserNameRepeat(
+            pBody.UserName,
+            connection,
          );
-      }
 
-      const countRepeatEmail = await this.srvUser.countEmailRepeat(
-         pBody.Email,
-         connection,
-      );
+         if (countRepeatUserName > 0) {
+            throw new Error("[VAL]El nombre de usuario ya existe");
+         }
 
-      if (countRepeatEmail > 0) {
-         throw new HttpException(
-            "[VAL]Usted ya tiene una con el mismo correo",
-            HttpStatus.BAD_REQUEST,
+         const countRepeatEmail = await this.srvUser.countEmailRepeat(
+            pBody.Email,
+            connection,
          );
+
+         if (countRepeatEmail > 0) {
+            throw new Error("[VAL]Usted ya tiene una con el mismo correo");
+         }
+         const TOKEN = String(generateNumberRandom());
+
+         return this.srvMSSQL.executeTransacctionIsSuccess(
+            "[VAL]Hubo un error al crear la cuenta",
+            connection,
+            async (pTransacction) => {
+               await this.srvUser.createUser(
+                  pBody.UserName,
+                  pBody.Password,
+                  pBody.Email,
+                  pBody.CreationDate,
+                  connection,
+                  pTransacction,
+               );
+
+               await this.srvAuth.createAthorization(
+                  pBody.Email,
+                  TOKEN,
+                  pBody.CreationDate,
+                  connection,
+                  pTransacction,
+               );
+               return true;
+            },
+         );
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
       }
-      const TOKEN = String(generateNumberRandom());
-
-      return this.srvMSSQL.executeTransacctionIsSuccess(
-         "[VAL]Hubo un error al crear la cuenta",
-         connection,
-         async (pTransacction) => {
-            await this.srvUser.createUser(
-               pBody.UserName,
-               pBody.Password,
-               pBody.Email,
-               pBody.CreationDate,
-               connection,
-               pTransacction,
-            );
-
-            await this.srvAuth.createAthorization(
-               pBody.Email,
-               TOKEN,
-               pBody.CreationDate,
-               connection,
-               pTransacction,
-            );
-            return true;
-         },
-      );
    }
 
    async activateAccount(pBody: ActiveAccountReqDto): Promise<boolean> {
       const connection = await this.srvMSSQL.createConnection();
-      const countAuthorizationUser = await this.srvAuth.countAuthorization(
-         pBody.Email,
-         pBody.CodeConfirmation,
-         connection,
-      );
-
-      if (countAuthorizationUser <= 0) {
-         throw new HttpException(
-            "[VAL]No existe niguna confirmación pendiente para este correo",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
-      const isSuccessUpdateAuthorization =
-         await this.srvAuth.updateAuthorization(
+      try {
+         const countAuthorizationUser = await this.srvAuth.countAuthorization(
             pBody.Email,
             pBody.CodeConfirmation,
             connection,
          );
-      if (!isSuccessUpdateAuthorization) {
-         throw new HttpException(
-            "[VAL]Hubo un error al activar la cuenta",
-            HttpStatus.BAD_REQUEST,
-         );
-      }
 
-      return true;
+         if (countAuthorizationUser <= 0) {
+            throw new Error(
+               "[VAL]No existe niguna confirmación pendiente para este correo",
+            );
+         }
+         const isSuccessUpdateAuthorization =
+            await this.srvAuth.updateAuthorization(
+               pBody.Email,
+               pBody.CodeConfirmation,
+               connection,
+            );
+         if (!isSuccessUpdateAuthorization) {
+            throw new Error("[VAL]Hubo un error al activar la cuenta");
+         }
+
+         return true;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 
    async loginAccount(pBody: LoginAccountReqDto): Promise<LoginAccountResDto> {
