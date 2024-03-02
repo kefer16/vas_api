@@ -30,6 +30,10 @@ export class TokensService {
             connection,
          );
 
+         if (!result) {
+            throw new Error("[VAL]Bearer Authentication Incorrecto");
+         }
+
          const resultMapper: ValidGlobalResDto = {
             Message: result.Message ?? "",
             IsActive: result.IsActive ?? false,

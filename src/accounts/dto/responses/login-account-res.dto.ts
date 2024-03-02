@@ -1,4 +1,5 @@
 export class LoginAccountResDto {
+   UserId: string;
    FirstName: string;
    SecondName: string;
    FirstLastName: string;
