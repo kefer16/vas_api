@@ -1,6 +1,6 @@
 # Vas API
 
-Aplicación Móvil Vas para gestion de proyectos
+API REST, que se utilizara para el aplicaciton de gestion de proyectos Vas
 
 ## Previsualización
 
