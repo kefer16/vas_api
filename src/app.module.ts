@@ -16,7 +16,9 @@ import { AuthorizationsModule } from "./authorizations/authorizations.module";
 import { EmailsModule } from "./emails/emails.module";
 import { AccountsModule } from "./accounts/accounts.module";
 import { AccountsController } from "./accounts/accounts.controller";
-import { TokensModule } from './tokens/tokens.module';
+import { TokensModule } from "./tokens/tokens.module";
+import { TasksModule } from "./tasks/tasks.module";
+import { TasksController } from "./tasks/tasks.controller";
 
 @Module({
    imports: [
@@ -32,6 +34,7 @@ import { TokensModule } from './tokens/tokens.module';
       AuthorizationsModule,
       EmailsModule,
       TokensModule,
+      TasksModule,
    ],
    providers: [
       ResponsesService,
@@ -50,6 +53,7 @@ export class AppModule implements NestModule {
             AccountsController,
             CompaniesController,
             ModulesController,
+            TasksController,
          );
    }
 }
