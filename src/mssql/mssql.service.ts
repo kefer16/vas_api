@@ -62,14 +62,14 @@ export class MSSQLService {
       nameProcedure: string,
       parameters: ProcedureParameter[] = [],
       pConnection: ConnectionPool,
-   ): Promise<any> {
+   ): Promise<string> {
       try {
          const request = pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
          const result = await request.execute(nameProcedure);
-         return result.recordset;
+         return result.recordset[0].LIST;
       } catch (error) {
          pConnection.close();
          throw new HttpException(
@@ -180,20 +180,27 @@ export class MSSQLService {
       nameProcedure: string,
       parameters: ProcedureParameter[],
       pConnection: ConnectionPool,
+      pTransacction?: Transaction,
    ): Promise<string> {
       try {
-         const request = pConnection.request();
+         const request = pTransacction
+            ? new Request(pTransacction)
+            : pConnection.request();
          parameters.forEach((item: ProcedureParameter) => {
             request.input(item.variableName, item.typeVariable, item.value);
          });
          const result = await request.execute(nameProcedure);
          return result.recordset[0].JSON;
       } catch (error) {
-         pConnection.close();
-         throw new HttpException(
-            `Error al ejecutar la consulta: ${error.message}`,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-         );
+         if (pTransacction) {
+            throw error;
+         } else {
+            pConnection.close();
+            throw new HttpException(
+               `Error al ejecutar la consulta: ${error.message}`,
+               HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+         }
       }
    }
 }

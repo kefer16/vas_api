@@ -1,6 +1,7 @@
 import { HttpStatus, Type, applyDecorators } from "@nestjs/common";
 import {
    ApiBadRequestResponse,
+   ApiCreatedResponse,
    ApiExtraModels,
    ApiInternalServerErrorResponse,
    ApiOkResponse,
@@ -16,6 +17,22 @@ export const ApiModelResponseArray = <TModel extends Type<any>>(
    return applyDecorators(
       ApiExtraModels(ResponseResDto, model),
       ApiOkResponse({
+         schema: {
+            title: "ResponseResDto",
+            allOf: [
+               { $ref: getSchemaPath(ResponseResDto) },
+               {
+                  properties: {
+                     Data: {
+                        type: "array",
+                        items: { $ref: getSchemaPath(model) },
+                     },
+                  },
+               },
+            ],
+         },
+      }),
+      ApiCreatedResponse({
          schema: {
             title: "ResponseResDto",
             allOf: [
@@ -76,6 +93,17 @@ export const ApiModelResponseObject = <TModel extends Type<any>>(
    return applyDecorators(
       ApiExtraModels(ResponseResDto, model),
       ApiOkResponse({
+         schema: {
+            title: "RespuestaDto",
+            $ref: getSchemaPath(ResponseResDto),
+            properties: {
+               Data: {
+                  $ref: getSchemaPath(model),
+               },
+            },
+         },
+      }),
+      ApiCreatedResponse({
          schema: {
             title: "RespuestaDto",
             $ref: getSchemaPath(ResponseResDto),

@@ -9,7 +9,6 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CompaniesService } from "./companies.service";
-import { GetCompaniesResDto } from "./dto/responses/get-companies-res.dto";
 import { ResponseResDto } from "src/responses/response-res.dto";
 import {
    ApiModelResponse,
@@ -17,11 +16,9 @@ import {
    ApiModelResponseObject,
 } from "src/responses/response.model";
 import { ResponsesService } from "src/responses/responses.service";
-import { GetCompanyResDto } from "./dto/responses/get-company-res.dto";
-import { CreateCompanyResDto } from "./dto/responses/create-company-res.dto";
 import { CreateCompanyReqDto } from "./dto/requests/create-company-req.dto";
 import { UpdateCompanyReqDto } from "./dto/requests/update-company-req.dto";
-import { UpdateCompanyResDto } from "./dto/responses/update-company-res.dto";
+import { CompanyUserResDto } from "./dto/responses/company-user-res.dto";
 @ApiBearerAuth()
 @ApiTags("Companies")
 @Controller("companies")
@@ -29,19 +26,19 @@ export class CompaniesController {
    constructor(private srvCompany: CompaniesService) {}
 
    @Get()
-   @ApiModelResponseArray(GetCompaniesResDto)
-   async getCompanies(): Promise<ResponseResDto<GetCompaniesResDto[]>> {
-      const result = new ResponsesService<GetCompaniesResDto[]>();
+   @ApiModelResponseArray(CompanyUserResDto)
+   async getCompanies(): Promise<ResponseResDto<CompanyUserResDto[]>> {
+      const result = new ResponsesService<CompanyUserResDto[]>();
 
       return result.repuestaCorrecta(await this.srvCompany.getCompanies());
    }
 
    @Post()
-   @ApiModelResponseObject(CreateCompanyResDto)
+   @ApiModelResponseObject(CompanyUserResDto)
    async createCompany(
       @Body() pBody: CreateCompanyReqDto,
-   ): Promise<ResponseResDto<CreateCompanyResDto>> {
-      const result = new ResponsesService<CreateCompanyResDto>();
+   ): Promise<ResponseResDto<CompanyUserResDto>> {
+      const result = new ResponsesService<CompanyUserResDto>();
 
       return result.repuestaCorrecta(
          await this.srvCompany.createCompany(pBody),
@@ -49,21 +46,21 @@ export class CompaniesController {
    }
 
    @Get(":id")
-   @ApiModelResponseObject(GetCompanyResDto)
+   @ApiModelResponseObject(CompanyUserResDto)
    async getCompany(
       @Param("id") pId: string,
-   ): Promise<ResponseResDto<GetCompanyResDto>> {
-      const result = new ResponsesService<GetCompanyResDto>();
+   ): Promise<ResponseResDto<CompanyUserResDto>> {
+      const result = new ResponsesService<CompanyUserResDto>();
       return result.repuestaCorrecta(await this.srvCompany.getCompany(pId));
    }
 
    @Put(":id")
-   @ApiModelResponseObject(UpdateCompanyResDto)
+   @ApiModelResponseObject(CompanyUserResDto)
    async updateCompany(
       @Param("id") pId: string,
       @Body() pBody: UpdateCompanyReqDto,
-   ): Promise<ResponseResDto<UpdateCompanyResDto>> {
-      const result = new ResponsesService<UpdateCompanyResDto>();
+   ): Promise<ResponseResDto<CompanyUserResDto>> {
+      const result = new ResponsesService<CompanyUserResDto>();
 
       return result.repuestaCorrecta(
          await this.srvCompany.updateCompany(pId, pBody),

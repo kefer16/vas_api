@@ -1,6 +1,10 @@
 export class CreateCompanyReqDto {
-   Name: string;
+   ShortName: string;
+   FullName: string;
+   Description: string;
    Email: string;
+   Page: string;
    CreationDate: Date;
    IsActive: boolean;
+   FkUserId: string;
 }

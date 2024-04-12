@@ -13,16 +13,19 @@ export class PrivilegesService {
          connection,
       );
 
-      const resultMapper: GetPrivilegesResDto[] = result.map(
-         (item) =>
-            ({
-               PrivilegeId: item.PrivilegeId ?? "",
-               Name: item.Name ?? "",
-               Abbreviation: item.Abbreviation ?? "",
-               CreationDate: item.CreationDate ?? new Date(),
-               IsActive: item.IsActive ?? false,
-            }) as GetPrivilegesResDto,
-      );
+      // const resultMapper: GetPrivilegesResDto[] = result.map(
+      //    (item) =>
+      //       ({
+      //          PrivilegeId: item.PrivilegeId ?? "",
+      //          Name: item.Name ?? "",
+      //          Abbreviation: item.Abbreviation ?? "",
+      //          CreationDate: item.CreationDate ?? new Date(),
+      //          IsActive: item.IsActive ?? false,
+      //       }) as GetPrivilegesResDto,
+      // );
+
+      const resultMapper: GetPrivilegesResDto[] =
+         result === null ? [] : JSON.parse(result);
 
       return resultMapper;
    }

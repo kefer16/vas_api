@@ -1,5 +1,8 @@
 export class UpdateCompanyReqDto {
-   Name: string;
+   ShortName: string;
+   FullName: string;
+   Description: string;
    Email: string;
+   Page: string;
    IsActive: boolean;
 }
