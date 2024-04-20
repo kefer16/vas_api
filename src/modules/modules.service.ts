@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
 import { ModuleResDto } from "./dto/responses/module-res.dto";
 import { Bit, DateTime, UniqueIdentifier, VarChar } from "mssql";
@@ -11,76 +11,108 @@ export class ModulesService {
 
    async getModules(): Promise<ModuleResDto[]> {
       const connection = await this.srvMSSQL.createConnection();
-      const result = await this.srvMSSQL.executeProcedure(
-         "spGetModules",
-         [],
-         connection,
-      );
+      try {
+         const result = await this.srvMSSQL.executeProcedureList(
+            "spGetModules",
+            [],
+            connection,
+         );
 
-      const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
+         const resultMapper: ModuleResDto[] =
+            result === null ? [] : JSON.parse(result);
 
-      return resultMapper;
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 
    async getModule(pId: string): Promise<ModuleResDto> {
       const connection = await this.srvMSSQL.createConnection();
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piModuleId",
-            typeVariable: UniqueIdentifier,
-            value: pId,
-         },
-      ];
-      const result = await this.srvMSSQL.executeProcedure(
-         "spGetModule",
-         parameters,
-         connection,
-      );
+      try {
+         const parameters: ProcedureParameter[] = [
+            {
+               variableName: "piModuleId",
+               typeVariable: UniqueIdentifier,
+               value: pId,
+            },
+         ];
+         const result = await this.srvMSSQL.executeProcedureJSON(
+            "spGetModule",
+            parameters,
+            connection,
+         );
 
-      const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
+         const resultMapper: ModuleResDto =
+            result === null ? new ModuleResDto() : JSON.parse(result);
 
-      return resultMapper[0];
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 
    async createModule(pBody: CreateModuleReqDto): Promise<ModuleResDto> {
       const connection = await this.srvMSSQL.createConnection();
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piName",
-            typeVariable: VarChar(300),
-            value: pBody.Name,
-         },
-         {
-            variableName: "piCreationDate",
-            typeVariable: DateTime,
-            value: pBody.CreationDate,
-         },
-         {
-            variableName: "piIsActive",
-            typeVariable: Bit,
-            value: pBody.IsActive,
-         },
-         {
-            variableName: "piFkCompanyId",
-            typeVariable: UniqueIdentifier,
-            value: pBody.FkCompanyId,
-         },
-         {
-            variableName: "piFkUserId",
-            typeVariable: UniqueIdentifier,
-            value: pBody.FkUserId,
-         },
-      ];
+      try {
+         let resultMapper: ModuleResDto = new ModuleResDto();
+         const parameters: ProcedureParameter[] = [
+            {
+               variableName: "piName",
+               typeVariable: VarChar(300),
+               value: pBody.Name,
+            },
+            {
+               variableName: "piCreationDate",
+               typeVariable: DateTime,
+               value: pBody.CreationDate,
+            },
+            {
+               variableName: "piIsActive",
+               typeVariable: Bit,
+               value: pBody.IsActive,
+            },
+            {
+               variableName: "piFkCompanyId",
+               typeVariable: UniqueIdentifier,
+               value: pBody.FkCompanyId,
+            },
+            {
+               variableName: "piFkUserId",
+               typeVariable: UniqueIdentifier,
+               value: pBody.FkUserId,
+            },
+         ];
 
-      const result = await this.srvMSSQL.executeProcedure(
-         "spCreateModule",
-         parameters,
-         connection,
-      );
+         const transacction =
+            await this.srvMSSQL.createTransacction(connection);
 
-      const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
+         try {
+            await this.srvMSSQL.beginTransacction(transacction);
+            const result = await this.srvMSSQL.executeProcedureJSON(
+               "spCreateModule",
+               parameters,
+               connection,
+               transacction,
+            );
 
-      return resultMapper[0];
+            resultMapper =
+               result === null ? new ModuleResDto() : JSON.parse(result);
+            await this.srvMSSQL.commitTransacction(transacction);
+         } catch (error) {
+            await this.srvMSSQL.rollbackTransacction(transacction);
+            throw error;
+         }
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 
    async updateModule(
@@ -88,59 +120,95 @@ export class ModulesService {
       pBody: UpdateModuleReqDto,
    ): Promise<ModuleResDto> {
       const connection = await this.srvMSSQL.createConnection();
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piModuleId",
-            typeVariable: UniqueIdentifier,
-            value: pId,
-         },
-         {
-            variableName: "piName",
-            typeVariable: VarChar(100),
-            value: pBody.Name,
-         },
-         {
-            variableName: "piIsActive",
-            typeVariable: Bit,
-            value: pBody.IsActive,
-         },
-         {
-            variableName: "piFkCompanyId",
-            typeVariable: UniqueIdentifier,
-            value: pBody.FkCompanyId,
-         },
-         {
-            variableName: "piFkUserId",
-            typeVariable: UniqueIdentifier,
-            value: pBody.FkUserId,
-         },
-      ];
+      try {
+         let resultMapper = new ModuleResDto();
+         const parameters: ProcedureParameter[] = [
+            {
+               variableName: "piModuleId",
+               typeVariable: UniqueIdentifier,
+               value: pId,
+            },
+            {
+               variableName: "piName",
+               typeVariable: VarChar(100),
+               value: pBody.Name,
+            },
+            {
+               variableName: "piIsActive",
+               typeVariable: Bit,
+               value: pBody.IsActive,
+            },
+            {
+               variableName: "piFkCompanyId",
+               typeVariable: UniqueIdentifier,
+               value: pBody.FkCompanyId,
+            },
+            {
+               variableName: "piFkUserId",
+               typeVariable: UniqueIdentifier,
+               value: pBody.FkUserId,
+            },
+         ];
+         const transacction =
+            await this.srvMSSQL.createTransacction(connection);
 
-      const result = await this.srvMSSQL.executeProcedure(
-         "spUpdateModule",
-         parameters,
-         connection,
-      );
+         try {
+            await this.srvMSSQL.beginTransacction(transacction);
 
-      const resultMapper: ModuleResDto[] = JSON.parse(result.JSON);
+            const result = await this.srvMSSQL.executeProcedureJSON(
+               "spUpdateModule",
+               parameters,
+               connection,
+               transacction,
+            );
 
-      return resultMapper[0];
+            resultMapper =
+               result === null ? new ModuleResDto() : JSON.parse(result);
+         } catch (error) {
+            await this.srvMSSQL.rollbackTransacction(transacction);
+            throw error;
+         }
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 
    async deleteModule(pId: string): Promise<boolean> {
       const connection = await this.srvMSSQL.createConnection();
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piModuleId",
-            typeVariable: UniqueIdentifier,
-            value: pId,
-         },
-      ];
+      try {
+         let resultMapper: boolean = false;
+         const parameters: ProcedureParameter[] = [
+            {
+               variableName: "piModuleId",
+               typeVariable: UniqueIdentifier,
+               value: pId,
+            },
+         ];
+         const transacction =
+            await this.srvMSSQL.createTransacction(connection);
 
-      return await this.srvMSSQL.executeProcedureIsSuccess(
-         "spDeleteModule",
-         parameters,
-         connection,
-      );
+         try {
+            await this.srvMSSQL.beginTransacction(transacction);
+
+            resultMapper = await this.srvMSSQL.executeProcedureIsSuccess(
+               "spDeleteModule",
+               parameters,
+               connection,
+               transacction,
+            );
+            await this.srvMSSQL.commitTransacction(transacction);
+         } catch (error) {
+            await this.srvMSSQL.rollbackTransacction(transacction);
+            throw error;
+         }
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 }

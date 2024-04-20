@@ -18,22 +18,6 @@ export class CompaniesService {
             connection,
          );
 
-         // const resultMapper: CompanyUserResDto[] = result.map(
-         //    (item: CompanyUserResDto) =>
-         //       ({
-         //          CompanyId: item.CompanyId,
-         //          ShortName: item.ShortName,
-         //          FullName: item.FullName,
-         //          Description: item.Description,
-         //          Email: item.Email,
-         //          Page: item.Page,
-         //          CreationDate: item.CreationDate,
-         //          IsActive: item.IsActive,
-         //          FkUserId: item.FkUserId,
-         //          DtoUser: item.DtoUser,
-         //       }) as CompanyUserResDto,
-         // );
-
          const resultMapper: CompanyUserResDto[] =
             result === null ? [] : JSON.parse(result);
 
@@ -205,18 +189,6 @@ export class CompaniesService {
                transacction,
             );
 
-            // resultMapper = {
-            //    CompanyId: result.CompanyId,
-            //    ShortName: result.ShortName,
-            //    FullName: result.FullName,
-            //    Description: result.Description,
-            //    Email: result.Email,
-            //    Page: result.Page,
-            //    CreationDate: result.CreationDate,
-            //    IsActive: result.IsActive,
-            //    FkUserId: result.FkUserId,
-            //    DtoUser: result.DtoUser,
-            // };
             resultMapper =
                result === null ? new CompanyUserResDto() : JSON.parse(result);
 
@@ -235,18 +207,38 @@ export class CompaniesService {
 
    async deleteCompany(pId: string): Promise<boolean> {
       const connection = await this.srvMSSQL.createConnection();
-      const parameters: ProcedureParameter[] = [
-         {
-            variableName: "piCompanyId",
-            typeVariable: UniqueIdentifier,
-            value: pId,
-         },
-      ];
+      try {
+         let resultMapper: boolean = false;
+         const parameters: ProcedureParameter[] = [
+            {
+               variableName: "piCompanyId",
+               typeVariable: UniqueIdentifier,
+               value: pId,
+            },
+         ];
 
-      return await this.srvMSSQL.executeProcedureIsSuccess(
-         "spDeleteCompany",
-         parameters,
-         connection,
-      );
+         const transacction =
+            await this.srvMSSQL.createTransacction(connection);
+
+         try {
+            await this.srvMSSQL.beginTransacction(transacction);
+
+            resultMapper = await this.srvMSSQL.executeProcedureIsSuccess(
+               "spDeleteCompany",
+               parameters,
+               connection,
+               transacction,
+            );
+            await this.srvMSSQL.commitTransacction(transacction);
+         } catch (error) {
+            await this.srvMSSQL.rollbackTransacction(transacction);
+            throw error;
+         }
+         return resultMapper;
+      } catch (error) {
+         throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      } finally {
+         await this.srvMSSQL.close(connection);
+      }
    }
 }
