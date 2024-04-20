@@ -143,11 +143,6 @@ export class ModulesService {
                typeVariable: UniqueIdentifier,
                value: pBody.FkCompanyId,
             },
-            {
-               variableName: "piFkUserId",
-               typeVariable: UniqueIdentifier,
-               value: pBody.FkUserId,
-            },
          ];
          const transacction =
             await this.srvMSSQL.createTransacction(connection);
