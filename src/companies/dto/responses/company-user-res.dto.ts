@@ -1,5 +1,4 @@
-import { UserResponseDto } from "src/users/dto/responses/user-response.dto";
-
+import { DtoFkUserRes } from "src/users/dto/responses/fk-user-res.dto";
 export class CompanyUserResDto {
    CompanyId?: string = "";
    ShortName?: string = "";
@@ -10,5 +9,5 @@ export class CompanyUserResDto {
    CreationDate?: Date = new Date();
    IsActive?: boolean = false;
    FkUserId?: string = "";
-   DtoUser?: UserResponseDto = new UserResponseDto();
+   DtoUser?: DtoFkUserRes = new DtoFkUserRes();
 }

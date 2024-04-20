@@ -1,11 +1,11 @@
-import { ObjCompanyResDto } from "src/companies/dto/responses/obj-company-res.dto";
-import { ObjUserResDto } from "src/users/dto/requests/obj-user-req.dto";
+import { DtoFkCompanyRes } from "src/companies/dto/responses/fk-company-res.dto";
+import { DtoFkUserRes } from "src/users/dto/responses/fk-user-res.dto";
 
 export class ModuleResDto {
    ModuleId: string;
    Name: string;
    CreationDate: Date;
    IsActive: boolean;
-   ObjCompany: ObjCompanyResDto;
-   ObjUser: ObjUserResDto;
+   DtoCompany: DtoFkCompanyRes;
+   DtoUser: DtoFkUserRes;
 }

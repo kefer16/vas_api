@@ -1,4 +1,4 @@
-export class ObjCompanyResDto {
+export class DtoFkCompanyRes {
    CompanyId: string;
    Name: string;
 }
