@@ -39,7 +39,7 @@ export class ErrorsService {
          {
             variableName: "piObject",
             typeVariable: VarChar(8000),
-            value: JSON.stringify(pData.getResponse),
+            value: "",
          },
          {
             variableName: "piMessage",
