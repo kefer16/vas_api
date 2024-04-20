@@ -19,6 +19,7 @@ import { AccountsController } from "./accounts/accounts.controller";
 import { TokensModule } from "./tokens/tokens.module";
 import { TasksModule } from "./tasks/tasks.module";
 import { TasksController } from "./tasks/tasks.controller";
+import { ErrorModule } from "./errors/error.module";
 
 @Module({
    imports: [
@@ -35,6 +36,7 @@ import { TasksController } from "./tasks/tasks.controller";
       EmailsModule,
       TokensModule,
       TasksModule,
+      ErrorModule,
    ],
    providers: [
       ResponsesService,

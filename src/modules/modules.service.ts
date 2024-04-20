@@ -4,10 +4,14 @@ import { ModuleResDto } from "./dto/responses/module-res.dto";
 import { Bit, DateTime, UniqueIdentifier, VarChar } from "mssql";
 import { CreateModuleReqDto } from "./dto/requests/create-module-req.dto";
 import { UpdateModuleReqDto } from "./dto/requests/update-module-req.dto";
+import { ErrorsService } from "src/errors/errors.service";
 
 @Injectable()
 export class ModulesService {
-   constructor(private srvMSSQL: MSSQLService) {}
+   constructor(
+      private srvMSSQL: MSSQLService,
+      private srvError: ErrorsService,
+   ) {}
 
    async getModules(): Promise<ModuleResDto[]> {
       const connection = await this.srvMSSQL.createConnection();
@@ -105,10 +109,12 @@ export class ModulesService {
             await this.srvMSSQL.commitTransacction(transacction);
          } catch (error) {
             await this.srvMSSQL.rollbackTransacction(transacction);
+
             throw error;
          }
          return resultMapper;
       } catch (error) {
+         await this.srvError.insertar(error);
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {
          await this.srvMSSQL.close(connection);

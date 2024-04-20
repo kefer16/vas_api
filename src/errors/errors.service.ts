@@ -1,6 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
+import { MSSQLService, ProcedureParameter } from "src/mssql/mssql.service";
+import { DateTime, Int, VarChar } from "mssql";
 @Injectable()
 export class ErrorsService {
+   constructor(private srvMSSQL: MSSQLService) {}
    obtenerFechaLocal = (): string => {
       const local = new Date();
       local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
@@ -18,9 +21,47 @@ export class ErrorsService {
          return "";
       }
    }
-   // grabarErrorSQL(pError: Error) {
-   //    const result = new ResponsesService<null>();
 
-   //    return result.repuestaErrorSQL(true, "0", pError.message);
-   // }
+   async insertar(pData: HttpException) {
+      const connection = await this.srvMSSQL.createConnection();
+
+      const parameters: ProcedureParameter[] = [
+         {
+            variableName: "piCode",
+            typeVariable: VarChar(10),
+            value: "0",
+         },
+         {
+            variableName: "piLine",
+            typeVariable: Int,
+            value: 0,
+         },
+         {
+            variableName: "piObject",
+            typeVariable: VarChar(8000),
+            value: JSON.stringify(pData.getResponse),
+         },
+         {
+            variableName: "piMessage",
+            typeVariable: VarChar(8000),
+            value: pData.message,
+         },
+         {
+            variableName: "piServer",
+            typeVariable: VarChar(150),
+            value: "",
+         },
+         {
+            variableName: "piCreationDate",
+            typeVariable: DateTime,
+            value: new Date(),
+         },
+      ];
+
+      await this.srvMSSQL.executeProcedureIsSuccess(
+         "spInsertError",
+         parameters,
+         connection,
+      );
+   }
 }
