@@ -38,12 +38,12 @@ export class ErrorsService {
          },
          {
             variableName: "piObject",
-            typeVariable: VarChar(8000),
+            typeVariable: VarChar(4000),
             value: "",
          },
          {
             variableName: "piMessage",
-            typeVariable: VarChar(8000),
+            typeVariable: VarChar(4000),
             value: pData.message,
          },
          {

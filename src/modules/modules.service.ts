@@ -27,6 +27,7 @@ export class ModulesService {
 
          return resultMapper;
       } catch (error) {
+         await this.srvError.insertar(error);
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {
          await this.srvMSSQL.close(connection);
@@ -54,6 +55,7 @@ export class ModulesService {
 
          return resultMapper;
       } catch (error) {
+         await this.srvError.insertar(error);
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {
          await this.srvMSSQL.close(connection);
@@ -171,6 +173,7 @@ export class ModulesService {
          }
          return resultMapper;
       } catch (error) {
+         await this.srvError.insertar(error);
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {
          await this.srvMSSQL.close(connection);
@@ -207,6 +210,7 @@ export class ModulesService {
          }
          return resultMapper;
       } catch (error) {
+         await this.srvError.insertar(error);
          throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
       } finally {
          await this.srvMSSQL.close(connection);
