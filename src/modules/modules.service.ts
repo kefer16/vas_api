@@ -167,6 +167,8 @@ export class ModulesService {
 
             resultMapper =
                result === null ? new ModuleResDto() : JSON.parse(result);
+
+            await this.srvMSSQL.commitTransacction(transacction);
          } catch (error) {
             await this.srvMSSQL.rollbackTransacction(transacction);
             throw error;
