@@ -41,6 +41,8 @@ export class AccountsService {
          }
          const TOKEN = String(generateNumberRandom());
 
+         this.srvEmail.sendEmailAuthorization(pBody.Email, TOKEN);
+
          const transacction =
             await this.srvMSSQL.createTransacction(connection);
 

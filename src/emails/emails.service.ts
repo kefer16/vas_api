@@ -44,7 +44,7 @@ export class EmailsService {
 
       const { error } = await resend.emails.send({
          from: "onboarding@resend.dev",
-         to: "morafi.1999.16@gmail.com",
+         to: pEmail,
          subject: "Activación de Cuenta - Prueba",
          html: HTML,
       });
