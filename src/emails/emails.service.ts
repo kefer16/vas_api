@@ -43,7 +43,7 @@ export class EmailsService {
       </html>`;
 
       const { error } = await resend.emails.send({
-         from: "onboarding@resend.dev",
+         from: "vas@kefer.dev",
          to: pEmail,
          subject: "Activación de Cuenta - Prueba",
          html: HTML,
